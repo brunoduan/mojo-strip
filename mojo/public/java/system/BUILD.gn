@@ -152,7 +152,7 @@ shared_library("mojo_java_unittests") {
     ":system_impl_java_jni_headers",
     ":test_support",
     "//base",
-    "//base/test:test_support",
+    #"//base/test:test_support",
     "//mojo/core/embedder",
     "//mojo/public/cpp/bindings/tests:mojo_public_bindings_test_utils",
     "//mojo/public/cpp/test_support:test_utils",

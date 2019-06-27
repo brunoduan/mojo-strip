@@ -10,8 +10,8 @@ import("//build/config/jumbo.gni")
 # Chrome builds. Ideally we could create some generic knobs here that could be
 # flipped elsewhere though.
 import("//build/config/chrome_build.gni")
-import("//build/config/nacl/config.gni")
-import("//components/nacl/features.gni")
+#import("//build/config/nacl/config.gni")
+#import("//components/nacl/features.gni")
 import("//third_party/jinja2/jinja2.gni")
 import("//tools/ipc_fuzzer/ipc_fuzzer.gni")
 
@@ -24,13 +24,13 @@ declare_args() {
   # Note that (perhaps obviously) a huge amount of Chromium code will not build
   # with typemapping disabled, so it is never valid to set this to |false| in
   # any Chromium build configuration.
-  enable_mojom_typemapping = true
+  enable_mojom_typemapping = false
 
   # Controls message ID scrambling behavior. If |true|, message IDs are
   # scrambled (i.e. randomized based on the contents of //chrome/VERSION) on
   # non-Chrome OS desktop platforms. Set to |false| to disable message ID
   # scrambling on all platforms.
-  enable_mojom_message_id_scrambling = true
+  enable_mojom_message_id_scrambling = false
 }
 
 # NOTE: We would like to avoid scrambling message IDs where it doesn't add
@@ -49,7 +49,8 @@ declare_args() {
 enable_scrambled_message_ids =
     enable_mojom_message_id_scrambling &&
     (is_mac || is_win || (is_linux && !is_chromeos) ||
-     ((enable_nacl || is_nacl || is_nacl_nonsfi) && target_os != "chromeos"))
+     (target_os != "chromeos"))
+     #((enable_nacl || is_nacl || is_nacl_nonsfi) && target_os != "chromeos"))
 
 mojom_generator_root = "//mojo/public/tools/bindings"
 mojom_generator_script = "$mojom_generator_root/mojom_bindings_generator.py"

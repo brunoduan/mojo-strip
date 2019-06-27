@@ -55,35 +55,35 @@ component("shared_typemap_traits") {
   ]
 }
 
-source_set("tests") {
-  testonly = true
-
-  sources = [
-    "big_buffer_unittest.cc",
-    "big_string_unittest.cc",
-    "file_path_unittest.cc",
-    "file_unittest.cc",
-    "memory_allocator_dump_cross_process_uid_unittest.cc",
-    "process_id_unittest.cc",
-    "read_only_buffer_unittest.cc",
-    "ref_counted_memory_unittest.cc",
-    "shared_memory_unittest.cc",
-    "string16_unittest.cc",
-    "text_direction_unittest.cc",
-    "thread_priority_unittest.cc",
-    "time_unittest.cc",
-    "unguessable_token_unittest.cc",
-    "values_unittest.cc",
-  ]
-
-  public_deps = [
-    ":base",
-    ":shared_typemap_traits",
-    "//base",
-    "//base/test:test_support",
-    "//mojo/public/cpp/test_support:test_utils",
-    "//mojo/public/mojom/base",
-    "//mojo/public/mojom/base:read_only_buffer",
-    "//testing/gtest",
-  ]
-}
+#source_set("tests") {
+#  testonly = true
+#
+#  sources = [
+#    "big_buffer_unittest.cc",
+#    "big_string_unittest.cc",
+#    "file_path_unittest.cc",
+#    "file_unittest.cc",
+#    "memory_allocator_dump_cross_process_uid_unittest.cc",
+#    "process_id_unittest.cc",
+#    "read_only_buffer_unittest.cc",
+#    "ref_counted_memory_unittest.cc",
+#    "shared_memory_unittest.cc",
+#    "string16_unittest.cc",
+#    "text_direction_unittest.cc",
+#    "thread_priority_unittest.cc",
+#    "time_unittest.cc",
+#    "unguessable_token_unittest.cc",
+#    "values_unittest.cc",
+#  ]
+#
+#  public_deps = [
+#    ":base",
+#    ":shared_typemap_traits",
+#    "//base",
+#    "//base/test:test_support",
+#    "//mojo/public/cpp/test_support:test_utils",
+#    "//mojo/public/mojom/base",
+#    "//mojo/public/mojom/base:read_only_buffer",
+#    "//testing/gtest",
+#  ]
+#}
