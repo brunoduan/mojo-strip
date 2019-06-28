@@ -68,31 +68,31 @@ static_library("ced") {
   defines += [ "HTML5_MODE" ]
 }
 
-test("ced_unittests") {
-  sources = [
-    "src/compact_enc_det/compact_enc_det_fuzz_test.cc",
-    "src/compact_enc_det/compact_enc_det_unittest.cc",
-    "src/compact_enc_det/detail_head_string.inc",
-    "src/util/encodings/encodings_unittest.cc",
-  ]
-
-  configs += [ ":ced_config_private" ]
-
-  if (is_win) {
-    defines = [ "COMPILER_MSVC" ]
-    cflags = [
-      "/wd4310",  # Truncation of constant value.
-      "/wd4267",  # size_t -> int
-    ]
-  } else {
-    defines = [ "COMPILER_GCC" ]
-  }
-
-  defines += [ "HTML5_MODE" ]
-
-  deps = [
-    ":ced",
-    "//testing/gtest",
-    "//testing/gtest:gtest_main",
-  ]
-}
+#test("ced_unittests") {
+#  sources = [
+#    "src/compact_enc_det/compact_enc_det_fuzz_test.cc",
+#    "src/compact_enc_det/compact_enc_det_unittest.cc",
+#    "src/compact_enc_det/detail_head_string.inc",
+#    "src/util/encodings/encodings_unittest.cc",
+#  ]
+#
+#  configs += [ ":ced_config_private" ]
+#
+#  if (is_win) {
+#    defines = [ "COMPILER_MSVC" ]
+#    cflags = [
+#      "/wd4310",  # Truncation of constant value.
+#      "/wd4267",  # size_t -> int
+#    ]
+#  } else {
+#    defines = [ "COMPILER_GCC" ]
+#  }
+#
+#  defines += [ "HTML5_MODE" ]
+#
+#  deps = [
+#    ":ced",
+#    "//testing/gtest",
+#    "//testing/gtest:gtest_main",
+#  ]
+#}

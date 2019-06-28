@@ -10,7 +10,7 @@ java_library("junit") {
   supports_android = true
   proguard_configs = [ "//third_party/junit/proguard.flags" ]
   deps = [
-    "//third_party/hamcrest:hamcrest_java",
+    #"//third_party/hamcrest:hamcrest_java",
   ]
   java_files = [
     "src/src/main/java/junit/extensions/ActiveTestSuite.java",

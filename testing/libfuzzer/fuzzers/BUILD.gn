@@ -434,7 +434,7 @@ if (!is_win) {
 
     deps = [
       "//base",
-      "//base/test:test_support",
+      #"//base/test:test_support",
       "//skia",
       "//testing/libfuzzer/proto:skia_image_filter_converter",
       "//testing/libfuzzer/proto:skia_image_filter_proto",

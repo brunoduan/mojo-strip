@@ -1225,7 +1225,7 @@ if (enable_java_templates) {
     _build_config = "$target_gen_dir/$target_name.build_config"
     _build_config_target_name = "${target_name}__build_config"
     _deps = [
-      "//testing/android/junit:junit_test_support",
+      #"//testing/android/junit:junit_test_support",
       "//third_party/junit",
       "//third_party/mockito:mockito_java",
       "//third_party/robolectric:robolectric_all_java",
@@ -3076,7 +3076,7 @@ if (enable_java_templates) {
       deps = []
       data_deps = []
       forward_variables_from(invoker, "*")
-      deps += [ "//testing/android/broker:broker_java" ]
+      #deps += [ "//testing/android/broker:broker_java" ]
       data_deps += [
         "//build/android/pylib/device/commands",
         "//tools/android/forwarder2",
@@ -3103,7 +3103,7 @@ if (enable_java_templates) {
         if (!defined(invoker.proguard_configs)) {
           proguard_configs = []
         }
-        proguard_configs += [ "//testing/android/proguard_for_test.flags" ]
+        #proguard_configs += [ "//testing/android/proguard_for_test.flags" ]
         if (defined(final_apk_path)) {
           _final_apk_path = final_apk_path
         } else {
@@ -3199,7 +3199,8 @@ if (enable_java_templates) {
     if (!defined(invoker.android_manifest)) {
       jinja_template("${target_name}_manifest") {
         _native_library_name = get_label_info(invoker.shared_library, "name")
-        input = "//testing/android/native_test/java/AndroidManifest.xml.jinja2"
+        #input = "//testing/android/native_test/java/AndroidManifest.xml.jinja2"
+        input = " "
         output = _android_manifest
         variables = [
           "is_component_build=${is_component_build}",
@@ -3230,14 +3231,14 @@ if (enable_java_templates) {
       final_apk_path = "$root_build_dir/${apk_name}_apk/${apk_name}-debug.apk"
 
       if (!defined(use_default_launcher) || use_default_launcher) {
-        deps += [ "//testing/android/native_test:native_test_java" ]
+        #deps += [ "//testing/android/native_test:native_test_java" ]
       }
       shared_libraries = [ invoker.shared_library ]
       deps += [
         ":${target_name}__runtime_deps",
         ":${target_name}__secondary_abi__runtime_deps",
         "//base:base_java",
-        "//testing/android/reporter:reporter_java",
+        #"//testing/android/reporter:reporter_java",
       ]
       data_deps += [
         "//build/android/pylib/device/commands",
