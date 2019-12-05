@@ -1,6 +1,10 @@
 # mojo-embedder
-该项目允许在非chromium build环境来编译Mojo embedder
+该项目允许在非chromium build环境来编译Mojo(已完成)。
+后续增加service管理(进行中)，sandbox，非父子进程之间mojo通信等特性。
 
+愿景：非chromium应用能够使用mojo作为多个进程之间的通信机制。
+
+## 概述
 Mojo是Chromium团队开发的多进程／多线程通信模块，mojo embedder提供了最底层的通信API。
 
 目前mojo只能在基于类chromium的项目中使用，比如chromium, fuchsia, android等，要在第三方应用中使用mojo有点难度。因为mojo绑定了很多chromium依赖，主要来自base和build工具链的直接和间接依赖，mojo甚至依赖libchrome。
@@ -10,5 +14,7 @@ Mojo是Chromium团队开发的多进程／多线程通信模块，mojo embedder�
 ## 编译
 编译依赖chromium depot_tools，目前只在ubuntu，编译target为android版本。
 
+```
 gn gen --args='target_os="android" target_cpu="arm" is_component_build=true' out/Debug
 autoninja -C out/Debug mojo/core/embedder
+```
