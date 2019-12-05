@@ -24,7 +24,7 @@ declare_args() {
   # Note that (perhaps obviously) a huge amount of Chromium code will not build
   # with typemapping disabled, so it is never valid to set this to |false| in
   # any Chromium build configuration.
-  enable_mojom_typemapping = false
+  enable_mojom_typemapping = true
 
   # Controls message ID scrambling behavior. If |true|, message IDs are
   # scrambled (i.e. randomized based on the contents of //chrome/VERSION) on

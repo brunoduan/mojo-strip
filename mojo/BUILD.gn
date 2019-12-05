@@ -13,14 +13,14 @@ group("mojo") {
   ]
 
   if (!(is_linux && current_cpu == "x86")) {
-    #deps += [ "//mojo/public" ]
+    deps += [ "//mojo/public" ]
   }
 
   if (is_android) {
-    #deps += [ "//mojo/public/java/system" ]
+    deps += [ "//mojo/public/java/system" ]
   }
 
-  #deps += [ "//services/service_manager:all" ]
+  deps += [ "//services/service_manager:all" ]
 }
 
 #group("tests") {
