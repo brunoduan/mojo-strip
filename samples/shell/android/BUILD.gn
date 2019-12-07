@@ -1,0 +1,97 @@
+
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//base/android/jni_generator/jni_exception_list.gni")
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+
+samples_shell_manifest = "$target_gen_dir/samples_shell_manifest/AndroidManifest.xml"
+
+
+jumbo_static_library("samples_shell_lib") {
+  sources = [
+  ]
+
+  configs += [
+    "//build/config:precompiled_headers",
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]
+
+  public_deps = [
+    "//ipc",
+  ]
+  deps = [
+    "//base",
+    "//base:base_static",
+    "//base/third_party/dynamic_annotations",
+    "//services/service_manager/public/cpp",
+  ]
+}
+
+
+shared_library("libsamples_shell") {
+  deps = [
+    ":samples_shell_lib",
+  ]
+  sources = [
+    "shell_library_loader.cc",
+  ]
+}
+
+
+android_resources("samples_shell_java_resources") {
+  resource_dirs = [ "java/res" ]
+  custom_package = "com.xpeng.samples_shell"
+}
+
+
+jinja_template("samples_shell_manifest") {
+  input = "shell_apk/AndroidManifest.xml.jinja2"
+  output = samples_shell_manifest
+}
+
+
+android_resources("samples_shell_apk_resources") {
+  resource_dirs = [ "shell_apk/res" ]
+  deps = [
+    ":samples_shell_java_resources",
+  ]
+  android_manifest = samples_shell_manifest
+  android_manifest_dep = ":samples_shell_manifest"
+}
+
+
+android_library("samples_shell_apk_java") {
+  deps = [ 
+    ":samples_shell_apk_resources",
+    ":samples_shell_manifest",
+    ":samples_shell_java_resources",
+    "//base:base_java",
+    "//mojo/public/java:system_java",
+    "//third_party/jsr-305:jsr_305_javalib",
+  ]
+ 
+  android_manifest_for_lint = samples_shell_manifest
+ 
+  java_files = [ 
+    "shell_apk/src/com/xpeng/samples_shell_apk/SamplesShellActivity.java",
+    "shell_apk/src/com/xpeng/samples_shell_apk/SamplesShellApplication.java",
+  ]
+}
+
+
+android_assets("samples_shell_assets") {
+}                 
+                  
+android_apk("samples_shell_apk") {
+  enable_multidex = true
+  deps = [        
+    ":samples_shell_apk_java",
+    ":samples_shell_assets",
+    "//base:base_java",
+  ]               
+  apk_name = "MySamplesShell"
+  android_manifest = samples_shell_manifest
+  android_manifest_dep = ":samples_shell_manifest"
+  shared_libraries = [ ":libsamples_shell" ]
+}
