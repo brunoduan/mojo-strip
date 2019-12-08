@@ -7,7 +7,16 @@ import("//build/config/android/rules.gni")
 samples_shell_manifest = "$target_gen_dir/samples_shell_manifest/AndroidManifest.xml"
 
 
+generate_jni_registration("samples_shell_jni_registration") {
+  testonly = true
+  target = ":samples_shell_apk"
+  output = "$root_gen_dir/samples/shell/android/${target_name}.h"
+  exception_files = jni_exception_files
+}
+
+
 jumbo_static_library("samples_shell_lib") {
+  testonly = true
   sources = [
   ]
 
@@ -25,11 +34,13 @@ jumbo_static_library("samples_shell_lib") {
     "//base:base_static",
     "//base/third_party/dynamic_annotations",
     "//services/service_manager/public/cpp",
+    ":samples_shell_jni_registration",
   ]
 }
 
 
 shared_library("libsamples_shell") {
+  testonly = true
   deps = [
     ":samples_shell_lib",
   ]
@@ -40,18 +51,21 @@ shared_library("libsamples_shell") {
 
 
 android_resources("samples_shell_java_resources") {
+  testonly = true
   resource_dirs = [ "java/res" ]
   custom_package = "com.xpeng.samples_shell"
 }
 
 
 jinja_template("samples_shell_manifest") {
+  testonly = true
   input = "shell_apk/AndroidManifest.xml.jinja2"
   output = samples_shell_manifest
 }
 
 
 android_resources("samples_shell_apk_resources") {
+  testonly = true
   resource_dirs = [ "shell_apk/res" ]
   deps = [
     ":samples_shell_java_resources",
@@ -62,6 +76,7 @@ android_resources("samples_shell_apk_resources") {
 
 
 android_library("samples_shell_apk_java") {
+  testonly = true
   deps = [ 
     ":samples_shell_apk_resources",
     ":samples_shell_manifest",
@@ -84,11 +99,13 @@ android_assets("samples_shell_assets") {
 }                 
                   
 android_apk("samples_shell_apk") {
+  testonly = true
   enable_multidex = true
   deps = [        
     ":samples_shell_apk_java",
     ":samples_shell_assets",
     "//base:base_java",
+    "//mojo/public/java:base_java",
   ]               
   apk_name = "MySamplesShell"
   android_manifest = samples_shell_manifest
