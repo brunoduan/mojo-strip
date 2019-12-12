@@ -1,0 +1,126 @@
+import("//services/service_manager/public/service_manifest.gni")
+
+public_app_shared_sources = [
+  "samples_main.h",
+  #"samples_main_delegate.cc",
+  #"samples_main_delegate.h",
+]
+
+public_app_shared_deps = [
+  "//base",
+  "//base:i18n",
+  "//samples:export",
+  "//services/service_manager/background:lib",
+  "//services/service_manager/embedder",
+  "//services/service_manager/public/cpp",
+]
+
+if (is_component_build) {
+  source_set("both_sources") {
+    # Only the main samples shared library can pull this in.
+    visibility = [ "//samples:samples" ]
+
+    sources = public_app_shared_sources
+
+    configs += [ "//samples:samples_implementation" ]
+
+    deps = public_app_shared_deps + [
+             "//samples/app:both",
+             "//samples/public/master:master_sources",
+           ]
+
+    allow_circular_includes_from = [
+      # This target is a pair with the non-public version. They always go
+      # together and include headers from each other.
+      "//samples/app:both",
+    ]
+  }
+
+  # These all just forward to samples, which in turn depends on "both_sources".
+  group("master") {
+    public_deps = [
+      "//samples",
+    ]
+  }
+  group("slave") {
+    public_deps = [
+      "//samples",
+    ]
+  }
+  group("both") {
+    public_deps = [
+      "//samples",
+    ]
+  }
+} else {
+  source_set("both") {
+    check_includes = false  # See comment above.
+
+    sources = public_app_shared_sources
+    configs += [ "//samples:samples_implementation" ]
+    deps = public_app_shared_deps + [
+             "//samples/app:both",
+             "//samples/public/master",
+           ]
+
+    allow_circular_includes_from = [
+      # This target is a pair with the non-public version. They always go
+      # together and include headers from each other.
+      "//samples/app:both",
+    ]
+  }
+
+  if (is_multi_dll_chrome) {
+    source_set("master") {
+      check_includes = false  # See comment above.
+
+      sources = public_app_shared_sources
+
+      defines = [ "CHROME_MULTIPLE_DLL_BROWSER" ]
+      configs += [ "//samples:samples_implementation" ]
+
+      deps = public_app_shared_deps + [
+               "//samples/app:master",
+               "//samples/public/master",
+             ]
+
+      allow_circular_includes_from = [
+        # This target is a pair with the non-public version. They always go
+        # together and include headers from each other.
+        "//samples/app:master",
+      ]
+    }
+
+    source_set("slave") {
+      check_includes = false  # See comment above.
+
+      sources = public_app_shared_sources
+
+      defines = [ "CHROME_MULTIPLE_DLL_CHILD" ]
+      configs += [ "//samples:samples_implementation" ]
+
+      deps = public_app_shared_deps + [
+               "//samples/app:slave",
+             ]
+
+      allow_circular_includes_from = [
+        # This target is a pair with the non-public version. They always go
+        # together and include headers from each other.
+        "//samples/app:slave",
+      ]
+    }
+  } else {
+    # When the multi-DLL build is disabled, there is only one type of the
+    # "app" target, and "master" and "slave" are the same as "both".
+    group("master") {
+      deps = [
+        ":both",
+      ]
+    }
+    group("slave") {
+      deps = [
+        ":both",
+      ]
+    }
+  }
+}

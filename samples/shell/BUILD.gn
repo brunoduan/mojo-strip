@@ -1,0 +1,35 @@
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+
+jumbo_static_library("samples_shell_lib") {
+  testonly = true
+  sources = [
+    "android/shell_launcher.h",
+    "android/shell_launcher.cc",
+    "master/shell_master_context.h",
+    "master/shell_master_context.cc",
+  ]                    
+
+  configs += [
+    "//build/config:precompiled_headers",
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]
+
+  public_deps = [
+    "//ipc", 
+    "//samples/public/app:both",
+    "//samples/public/master",
+    "//samples/master",
+  ]
+
+  deps = [
+    "//base",
+    "//base:base_static",
+    "//base/third_party/dynamic_annotations",
+    "//services/service_manager/public/cpp",
+    "//mojo/public/java/system:native_support",
+    "//samples/shell/android:samples_shell_jni_headers",
+  ]                    
+}

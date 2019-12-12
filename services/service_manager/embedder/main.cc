@@ -24,8 +24,8 @@
 #include "base/trace_event/trace_config.h"
 #include "base/trace_event/trace_log.h"
 #include "build/build_config.h"
-#include "components/tracing/common/trace_to_console.h"
-#include "components/tracing/common/tracing_switches.h"
+//#include "components/tracing/common/trace_to_console.h"
+//#include "components/tracing/common/tracing_switches.h"
 #include "mojo/core/embedder/configuration.h"
 #include "mojo/core/embedder/embedder.h"
 #include "mojo/core/embedder/scoped_ipc_support.h"
@@ -40,9 +40,9 @@
 #include "services/service_manager/runner/common/client_util.h"
 #include "services/service_manager/runner/common/switches.h"
 #include "services/service_manager/runner/init.h"
-#include "ui/base/resource/resource_bundle.h"
-#include "ui/base/ui_base_paths.h"
-#include "ui/base/ui_base_switches.h"
+//#include "ui/base/resource/resource_bundle.h"
+//#include "ui/base/ui_base_paths.h"
+//#include "ui/base/ui_base_switches.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
@@ -249,13 +249,13 @@ int RunServiceManager(MainDelegate* delegate) {
 }
 
 void InitializeResources() {
-  const std::string locale =
-      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
-          ::switches::kLang);
-  // This loads the embedder's common resources (e.g. chrome_100_percent.pak for
-  // Chrome.)
-  ui::ResourceBundle::InitSharedInstanceWithLocale(
-      locale, nullptr, ui::ResourceBundle::LOAD_COMMON_RESOURCES);
+  //const std::string locale =
+  //    base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
+  //        ::switches::kLang);
+  //// This loads the embedder's common resources (e.g. chrome_100_percent.pak for
+  //// Chrome.)
+  //ui::ResourceBundle::InitSharedInstanceWithLocale(
+  //    locale, nullptr, ui::ResourceBundle::LOAD_COMMON_RESOURCES);
 }
 
 int RunService(MainDelegate* delegate) {
@@ -410,7 +410,7 @@ int Main(const MainParams& params) {
     delegate->OverrideMojoConfiguration(&mojo_config);
     mojo::core::Init(mojo_config);
 
-    ui::RegisterPathProvider();
+    //ui::RegisterPathProvider();
 
     tracker = base::debug::GlobalActivityTracker::Get();
     exit_code = delegate->Initialize(init_params);
@@ -431,13 +431,13 @@ int Main(const MainParams& params) {
     }
 #endif
 
-    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
-            ::switches::kTraceToConsole)) {
-      base::trace_event::TraceConfig trace_config =
-          tracing::GetConfigForTraceToConsole();
-      base::trace_event::TraceLog::GetInstance()->SetEnabled(
-          trace_config, base::trace_event::TraceLog::RECORDING_MODE);
-    }
+    //if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+    //        ::switches::kTraceToConsole)) {
+    //  base::trace_event::TraceConfig trace_config =
+    //      tracing::GetConfigForTraceToConsole();
+    //  base::trace_event::TraceLog::GetInstance()->SetEnabled(
+    //      trace_config, base::trace_event::TraceLog::RECORDING_MODE);
+    //}
   }
 
   const auto& command_line = *base::CommandLine::ForCurrentProcess();

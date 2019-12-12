@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+import com.xpeng.samples.shell.ShellLauncher;
+
 import org.chromium.base.MemoryPressureListener;
 import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
@@ -25,15 +27,17 @@ public class SamplesShellActivity extends Activity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-	setContentView(R.layout.samples_shell_activity);
+	    setContentView(R.layout.samples_shell_activity);
 
-	try {
+	    try {
             LibraryLoader.getInstance().ensureInitialized(LibraryProcessType.PROCESS_BROWSER);
-        } catch (ProcessInitException e) {
-            Log.e(TAG, "ContentView initialization failed.", e);
-            System.exit(-1);
-            return;
-        }
+      } catch (ProcessInitException e) {
+        Log.e(TAG, "ContentView initialization failed.", e);
+        System.exit(-1);
+        return;
+      }
+
+      ShellLauncher.getInstance().launchShell();
     }
 
     @Override

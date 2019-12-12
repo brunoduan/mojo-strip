@@ -10,8 +10,8 @@ group("all") {
   testonly = true
   deps = [
     ":service_manager",
-    #"//services/service_manager/background",
-    #"//services/service_manager/standalone",
+    "//services/service_manager/background",
+    "//services/service_manager/standalone",
   ]
 
   if (!is_ios) {
@@ -24,20 +24,20 @@ group("all") {
 }
 
 source_set("service_manager") {
-  #sources = [
-  #  "connect_params.cc",
-  #  "connect_params.h",
-  #  "connect_util.cc",
-  #  "connect_util.h",
-  #  "service_manager.cc",
-  #  "service_manager.h",
-  #  "service_overrides.cc",
-  #  "service_overrides.h",
-  #  "switches.cc",
-  #  "switches.h",
-  #]
+  sources = [
+    "connect_params.cc",
+    "connect_params.h",
+    "connect_util.cc",
+    "connect_util.h",
+    "service_manager.cc",
+    "service_manager.h",
+    "service_overrides.cc",
+    "service_overrides.h",
+    "switches.cc",
+    "switches.h",
+  ]
 
-  #configs += [ "//build/config/compiler:wexit_time_destructors" ]
+  configs += [ "//build/config/compiler:wexit_time_destructors" ]
 
   deps = [
     "//base/third_party/dynamic_annotations",
@@ -46,11 +46,11 @@ source_set("service_manager") {
   public_deps = [
     "//base",
     "//mojo/public/cpp/bindings",
-    #"//services/catalog:lib",
-    #"//services/catalog/public/mojom:constants",
+    "//services/catalog:lib",
+    "//services/catalog/public/mojom:constants",
     "//services/service_manager/public/cpp",
     "//services/service_manager/public/mojom",
-    #"//services/service_manager/runner/host:lib",
-    #"//services/service_manager/sandbox",
+    "//services/service_manager/runner/host:lib",
+    "//services/service_manager/sandbox",
   ]
 }

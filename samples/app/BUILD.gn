@@ -1,0 +1,125 @@
+import("//build/config/features.gni")
+
+template("implement_samples_app") {
+  runner_target_name = "samples_main_runner_" + target_name
+  main_target_name = target_name
+
+  extra_configs = [
+    "//build/config/compiler:wexit_time_destructors",
+    "//samples:samples_implementation",
+  ]
+  
+  samples_app_deps = [
+    "//base",
+    "//base:i18n",
+    "//services/service_manager/embedder",
+    "//services/service_manager/public/mojom",
+    "//services/service_manager/runner/common",
+    "//mojo/core/embedder",
+  ]
+
+  if (is_android) {
+    samples_app_deps += [
+      "//samples/public/android:samples_jni_headers",
+      "//samples/master",
+    ]
+  }
+
+  source_set(runner_target_name) {
+    visibility = [ ":$main_target_name" ]
+    check_includes = false     
+                               
+    sources = [                
+      #"samples_main_runner_impl.cc",
+      #"samples_main_runner_impl.h",
+    ]                          
+                               
+    configs += extra_configs   
+    deps = samples_app_deps    
+    if (defined(invoker.deps)) {
+      deps += invoker.deps     
+    }                          
+                               
+    forward_variables_from(invoker, [ "defines" ])
+  }
+
+  source_set(main_target_name) {
+    sources = [  
+      #"samples_service_manager_main_delegate.cc",
+      #"samples_service_manager_main_delegate.h",
+      "mojo/mojo_init.cc",
+      "mojo/mojo_init.h",
+    ]          
+  
+    configs += extra_configs
+    deps = samples_app_deps + [
+             ":$runner_target_name",
+             "//ipc",  
+             "//services/service_manager/embedder",
+           ]     
+    forward_variables_from(invoker,
+                           [
+                             "defines",
+                             "visibility",
+                           ])
+  
+    if (is_android) {  
+      sources += [     
+        #"android/samples_child_process_service_delegate.cc",
+        #"android/samples_jni_onload.cc",
+        #"android/samples_main.cc",
+        #"android/library_loader_hooks.cc",
+        #"android/library_loader_hooks.h",
+      ]        
+      deps += [  
+        "//mojo/public/java/system:native_support",
+      ]     
+    } else {           
+      sources += [ "samples_main.cc" ]
+    }
+  }
+}
+
+group("samples_app_master_deps") {
+  deps = [
+    "//samples/master",
+    "//samples/public/master:master_sources",
+  ]
+}
+
+group("samples_app_slave_deps") {
+  deps = [
+  ]
+}
+
+implement_samples_app("both") {
+  visibility = [
+    "//samples/public/app:*",
+  ]
+
+  deps = [
+    ":samples_app_master_deps",
+    ":samples_app_slave_deps",
+  ]
+}
+
+if (is_multi_dll_chrome) {
+  # It doesn't make sense to do the master/slave dll split in component mode.
+  assert(!is_component_build)
+  
+  implement_content_app("master") {
+    visibility = [ "//samples/public/app:master" ]
+    defines = [ "CHROME_MULTIPLE_DLL_MASTER" ]
+    deps = [
+      ":samples_app_master_deps",
+    ]
+  }
+  
+  implement_content_app("slave") {
+    visibility = [ "//samples/public/app:slave" ]
+    defines = [ "CHROME_MULTIPLE_DLL_SLAVE" ]
+    deps = [
+      ":samples_app_slave_deps",
+    ]
+  }
+}

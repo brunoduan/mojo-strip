@@ -1,0 +1,40 @@
+import("//build/config/jumbo.gni")
+
+group("master") {
+  if (is_component_build) {
+    public_deps = [
+      "//samples",
+    ]
+  } else {
+    public_deps = [
+      ":master_sources",
+    ]
+  }
+}
+
+jumbo_source_set("master_sources") {
+  visibility = [ "//samples/*" ]
+  sources = [
+    "master_context.h",
+  ]
+
+  configs += [
+    "//build/config:precompiled_headers",
+    "//samples:samples_implementation",
+  ]
+
+  public_deps = [
+    "//ipc",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//services/service_manager/public/cpp",
+  ]
+
+  deps = [
+    "//samples/master",
+  ]
+
+  allow_circular_includes_from = [
+    "//samples/master",
+  ]
+}

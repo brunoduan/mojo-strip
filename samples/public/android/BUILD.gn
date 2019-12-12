@@ -1,0 +1,33 @@
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+
+android_library("samples_java") {
+  deps = [
+    "//base:base_java",
+    "//mojo/public/java:base_java",
+    "//mojo/public/java:bindings_java",
+    "//mojo/public/java:system_java",
+    "//mojo/public/java/system:system_impl_java",
+    "//services/service_manager/public/java:service_manager_java",
+    "//services/service_manager/public/mojom:mojom_java",
+    "//third_party/android_deps:android_support_annotations_java",
+    "//third_party/jsr-305:jsr_305_javalib",
+    "//samples/echo:bindings_java",
+  ]
+
+  java_files = [
+    "java/src/com/xpeng/samples/shell/ShellHost.java",
+    "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
+    "java/src/com/xpeng/samples/app/EchoUtil.java",
+    #"java/src/com/xpeng/samples/app/SamplesMain.java",
+  ]
+}
+
+generate_jni("samples_jni_headers") {
+  sources = [
+    "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
+    #"java/src/com/xpeng/samples/app/SamplesMain.java",
+  ]
+
+  jni_package = "samples"
+}

@@ -1,0 +1,31 @@
+# Applied by targets internal to samples
+config("samples_implementation") {
+  defines = [ "SAMPLES_IMPLEMENTATION" ]
+  configs = [
+    "//build/config/compiler:noshadowing",
+    "//build/config/compiler:wexit_time_destructors",
+  ]
+}
+
+samples_shared_components = [
+  "//samples/public/master:master_sources",
+]
+
+if (is_component_build) {
+  component("samples") {
+    public_deps =
+        samples_shared_components + ["//samples/public/app:both_sources"]
+  }
+} else {
+  group("samples") {
+    public_deps = samples_shared_components
+  }
+}
+
+source_set("export") {
+  # Must only be used inside of samples.
+  visibility = [ "//samples/*" ]
+  sources = [
+    "common/export.h",
+  ]
+}
