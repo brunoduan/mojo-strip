@@ -15,6 +15,7 @@ import org.chromium.base.PathUtils;
 
 public class SamplesShellApplication extends Application {
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "samples_shell";
+    public static final String COMMAND_LINE_FILE = "/data/local/tmp/samples-shell-command-line";
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -24,5 +25,11 @@ public class SamplesShellApplication extends Application {
         ContextUtils.initApplicationContext(this);
         PathUtils.setPrivateDataDirectorySuffix(PRIVATE_DATA_DIRECTORY_SUFFIX);
         ApplicationStatus.initialize(this);
+    }
+
+    public void initCommandLine() {
+      if (!CommandLine.isInitialized()) {
+        CommandLine.initFromFile(COMMAND_LINE_FILE);
+      }
     }
 }

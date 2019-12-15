@@ -16,17 +16,20 @@ android_library("samples_java") {
   ]
 
   java_files = [
+    "java/src/com/xpeng/samples/master/MasterStartupControllerImpl.java",
     "java/src/com/xpeng/samples/shell/ShellHost.java",
     "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
+    "java/src/com/xpeng/samples_public/master/MasterStartupController.java",
     "java/src/com/xpeng/samples/app/EchoUtil.java",
-    #"java/src/com/xpeng/samples/app/SamplesMain.java",
+    "java/src/com/xpeng/samples/app/SamplesMain.java",
   ]
 }
 
 generate_jni("samples_jni_headers") {
   sources = [
+    "java/src/com/xpeng/samples/master/MasterStartupControllerImpl.java",
     "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
-    #"java/src/com/xpeng/samples/app/SamplesMain.java",
+    "java/src/com/xpeng/samples/app/SamplesMain.java",
   ]
 
   jni_package = "samples"

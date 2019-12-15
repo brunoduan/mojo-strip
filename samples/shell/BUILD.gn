@@ -20,6 +20,7 @@ jumbo_static_library("samples_shell_lib") {
   public_deps = [
     "//ipc", 
     "//samples/public/app:both",
+    "//samples/public/common",
     "//samples/public/master",
     "//samples/master",
   ]
@@ -30,6 +31,8 @@ jumbo_static_library("samples_shell_lib") {
     "//base/third_party/dynamic_annotations",
     "//services/service_manager/public/cpp",
     "//mojo/public/java/system:native_support",
+    "//samples/public/common",
+    "//samples/public/common:service_names",
     "//samples/shell/android:samples_shell_jni_headers",
   ]                    
 }

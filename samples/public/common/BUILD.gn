@@ -1,0 +1,168 @@
+import("//build/buildflag_header.gni")
+import("//build/config/features.gni")
+import("//build/config/jumbo.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+
+group("common") {
+  if (is_component_build) {
+    public_deps = [
+      "//samples",
+    ]
+  } else {
+    public_deps = [
+      ":common_sources",
+    ]
+  }
+}
+
+# This target allows other targets to depend on result_codes.h which is a
+# header-only dependency, without bringing in all of samples.
+source_set("result_codes") {
+  sources = [
+    "result_codes.h",
+  ]
+
+  deps = [
+    "//services/service_manager/embedder:embedder_result_codes",
+  ]
+}
+
+# This target allows other targets to depend on samples_descriptors.h which is
+# a header-only dependency, without bringing in all of samples.
+source_set("samples_descriptors") {
+  sources = [
+    "samples_descriptors.h",
+  ]
+
+  deps = [
+    "//ipc",
+  ]
+}
+
+# Forces static linking for targets using the static_switches constants, even
+# in the component build. This config makes it impossible to use the static
+# switches target and use the rest of samples at the same time, because the
+# component export flags won't be consistent.
+config("static_switches_defines") {
+  defines = [ "COMPILE_SAMPLES_STATICALLY" ]
+}
+
+# This target allows you to use the samples_switches constants and statically
+# link to it, without depending on the rest of samples. This is only for use
+# without samples, or you will get multiply defined symbols.
+source_set("static_switches") {
+  public = [
+    "samples_switches.h",
+  ]
+  sources = [
+    "//samples/common/export.h",
+    "samples_switches.cc",
+  ]
+
+  public_configs = [ ":static_switches_defines" ]
+
+}
+
+# This target allows you to use the samples_features constants and statically
+# link to it, without depending on the rest of samples. This is only for use
+# without samples, or you will get multiply defined symbols.
+source_set("static_features") {
+  public = [
+    "samples_features.h",
+  ]
+  sources = [
+    "//samples/common/export.h",
+    "samples_features.cc",
+  ]
+  public_deps = [
+    "//base",
+  ]
+
+  public_configs = [ ":static_switches_defines" ]
+
+}
+
+jumbo_source_set("common_sources") {
+  # External code should depend on via ":common" above.
+  visibility = [ "//samples/*" ]
+
+  sources = [
+    "samples_descriptors.h",
+    "samples_features.cc",
+    "samples_features.h",
+    "samples_switches.cc",
+    "samples_switches.h",
+  ]
+
+  configs += [
+    "//build/config:precompiled_headers",
+    "//samples:samples_implementation",
+  ]
+
+  public_deps = [
+    ":interfaces",
+    ":service_names",
+    "//samples/common",
+    "//ipc",
+    "//mojo/public/cpp/bindings",
+    "//services/service_manager/embedder",
+    "//services/service_manager/public/cpp",
+    "//services/service_manager/public/mojom",
+    "//url/ipc:url_ipc",
+  ]
+  deps = [
+    # This looks needless as we have //samples/common in public_deps, but it's
+    # needed because of allow_circular_includes_from.
+    "//samples/common:mojo_bindings",
+    "//services/service_manager/embedder:embedder_result_codes",
+    "//services/service_manager/public/cpp",
+    "//services/service_manager/zygote:zygote_buildflags",
+  ]
+
+  if (is_android) {
+    deps += [ "//samples/public/android:samples_jni_headers" ]
+  }
+
+  # //samples/common needs to include public headers.
+  allow_circular_includes_from = [
+    ":interfaces",
+    "//samples/common",
+    "//samples/common:mojo_bindings",
+  ]
+}
+
+mojom("interfaces") {
+  # We don't want Blink variants of these bindings to be generated.
+  disable_variants = true
+
+  # Must depend on //samples/public/common/ instead, for component build.
+  visibility = [
+    ":common_sources",
+    "//samples/common/*",
+  ]
+
+  # imports vs deps check is disabled for this target to work around
+  # windows multiple definitions linker error caused by having
+  # both a direct and an indirect dependency on the same target
+  skip_deps_check = true
+
+  sources = [
+    "load_timing_info.mojom",
+  ]
+
+  public_deps = [
+    "//url/mojom:url_mojom_gurl",
+    "//url/mojom:url_mojom_origin",
+  ]
+
+  component_output_prefix = "samples_public_common_mojo_bindings"
+  export_class_attribute = "SAMPLES_EXPORT"
+  export_define = "SAMPLES_IMPLEMENTATION=1"
+  export_header = "samples/common/export.h"
+}
+
+mojom("service_names") {
+  sources = [
+    "service_names.mojom",
+  ]
+}

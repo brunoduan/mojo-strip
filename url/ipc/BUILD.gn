@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//testing/test.gni")
-
 component("url_ipc") {
   sources = [
     "url_ipc_export.h",
@@ -20,22 +18,4 @@ component("url_ipc") {
   deps = [
     "//base",
   ]
-}
-
-# IPC unit tests aren't build on iOS.
-if (!is_ios) {
-  test("url_ipc_unittests") {
-    sources = [
-      "url_param_traits_unittest.cc",
-    ]
-
-    deps = [
-      ":url_ipc",
-      "//base",
-      "//base/test:run_all_unittests",
-      "//ipc:test_support",
-      "//testing/gtest",
-      "//url:url",
-    ]
-  }
 }

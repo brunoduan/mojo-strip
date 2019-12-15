@@ -12,6 +12,9 @@ template("implement_samples_app") {
   samples_app_deps = [
     "//base",
     "//base:i18n",
+    "//samples:export",
+    "//samples/public/common:common_sources",
+    "//samples/public/common:service_names",
     "//services/service_manager/embedder",
     "//services/service_manager/public/mojom",
     "//services/service_manager/runner/common",
@@ -67,7 +70,7 @@ template("implement_samples_app") {
       sources += [     
         #"android/samples_child_process_service_delegate.cc",
         #"android/samples_jni_onload.cc",
-        #"android/samples_main.cc",
+        "android/samples_main.cc",
         #"android/library_loader_hooks.cc",
         #"android/library_loader_hooks.h",
       ]        

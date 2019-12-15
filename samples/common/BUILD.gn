@@ -1,0 +1,144 @@
+import("features.gni")
+import("//build/buildflag_header.gni")
+import("//build/config/features.gni")
+import("//build/config/ui.gni")
+import("//ipc/features.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//sandbox/features.gni")
+import("//tools/ipc_fuzzer/ipc_fuzzer.gni")
+
+# For feature flags internal to content. See samples/public/common:features
+# for feature flags that clients of contents need to know about.
+buildflag_header("buildflags") {
+  header = "buildflags.h"
+
+  flags = [
+    "ALLOW_CRITICAL_MEMORY_PRESSURE_HANDLING_IN_FOREGROUND=$allow_critical_memory_pressure_handling_in_foreground",
+  ]
+}
+
+source_set("common") {
+  # Targets external to content should always link to the public API.
+  # In addition, targets outside of the content component (shell and tests)
+  # must not link to this because it will duplicate the code in the component
+  # build.
+  visibility = [ "//samples/*" ]
+
+  sources = [
+    "export.h",
+  ]
+
+  configs += [
+    "//samples:samples_implementation",
+    "//build/config:precompiled_headers",
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]
+
+  public_deps = [
+    ":mojo_bindings",
+    "//ipc",
+    "//services/service_manager/sandbox",
+  ]
+  deps = [
+    ":buildflags",
+    "//base",
+    "//base/third_party/dynamic_annotations",
+    "//components/services/filesystem/public/interfaces",
+    "//samples/public/common:interfaces",
+    "//samples/public/common:service_names",
+    "//ipc",
+    "//mojo/public/cpp/system",
+    "//sandbox",
+    "//sandbox:sandbox_buildflags",
+    "//services/service_manager",
+    "//services/service_manager/embedder",
+    "//services/service_manager/public/cpp",
+    "//services/service_manager/public/mojom",
+    "//services/service_manager/runner/common",
+    "//services/service_manager/zygote:zygote_buildflags",
+    "//url",
+    "//url/ipc:url_ipc",
+  ]
+
+  defines = []
+  include_dirs = []
+  libs = []
+  ldflags = []
+
+  allow_circular_includes_from = [
+    ":mojo_bindings",
+    "//samples/public/common:interfaces",
+  ]
+
+  if (is_android && use_seccomp_bpf) {
+    set_sources_assignment_filter([])
+    sources += [
+      "//services/service_manager/sandbox/linux/bpf_base_policy_linux.cc",
+      "//services/service_manager/sandbox/linux/bpf_base_policy_linux.h",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
+  }
+
+  if (is_android) {
+    deps += [
+      #"//samples/public/android:common_aidl",
+      "//samples/public/android:samples_jni_headers",
+    ]
+
+    libs += [ "android" ]
+  }
+
+  if (enable_ipc_fuzzer) {
+    configs += [ "//tools/ipc_fuzzer:ipc_fuzzer_config" ]
+    sources += [
+      "external_ipc_dumper.cc",
+      "external_ipc_dumper.h",
+    ]
+  }
+}
+
+mojom("mojo_bindings") {
+  # This interface is internal to content.
+  visibility = [ "//samples/*" ]
+
+  # indexed_db.mojom used a native typemap that was not available in Java.
+  # indexed_db.mojom was removed in an earlier commit.  This should be removed
+  # at some point.
+  cpp_only = true
+
+  # imports vs deps check is disabled for this target to work around
+  # windows multiple definitions linker error caused by having
+  # both a direct and an indirect dependency on the same target
+  skip_deps_check = true
+
+  disable_variants = true
+
+  sources = [
+    "slave.mojom",
+    "slave_control.mojom",
+  ]
+
+  enabled_features = []
+  if (enable_ipc_logging) {
+    enabled_features += [ "ipc_logging" ]
+  }
+
+  import_dirs = [ "//mojo/services" ]
+
+  public_deps = [
+    # Due to component_deps below, we're depending on blink_common, but
+    # blink_common does not export generated types of components/payments/mojom,
+    # so we need to specifically add this dependency here.
+    "//samples/public/common:interfaces",
+    "//ipc:mojom_constants",
+    "//mojo/public/mojom/base",
+    "//services/service_manager/public/mojom",
+    "//url/mojom:url_mojom_gurl",
+    "//url/mojom:url_mojom_origin",
+  ]
+
+  component_output_prefix = "samples_common_mojo_bindings"
+  export_class_attribute = "SAMPLES_EXPORT"
+  export_define = "SAMPLES_IMPLEMENTATION=1"
+  export_header = "samples/common/export.h"
+}

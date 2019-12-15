@@ -8,6 +8,7 @@ config("samples_implementation") {
 }
 
 samples_shared_components = [
+  "//samples/public/common:common_sources",
   "//samples/public/master:master_sources",
 ]
 
