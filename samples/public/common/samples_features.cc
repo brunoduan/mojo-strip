@@ -49,6 +49,12 @@ const base::Feature kAudioServiceOutOfProcess{
 const base::Feature kBackgroundFetch{"BackgroundFetch",
                                      base::FEATURE_ENABLED_BY_DEFAULT};
 
+// Controls whether SpareRenderProcessHostManager tries to always have a warm
+// spare renderer process around for the most recently requested BrowserContext.
+// This feature is only consulted in site-per-process mode.
+const base::Feature kSpareSlavererForSitePerProcess{
+    "SpareSlavererForSitePerProcess", base::FEATURE_ENABLED_BY_DEFAULT};
+
 // Enable incremental marking for Blink's heap managed by the Oilpan garbage
 // collector.
 const base::Feature kBlinkHeapIncrementalMarking{
@@ -402,12 +408,6 @@ const char kSignedHTTPExchangeAcceptHeaderFieldTrialParamName[] = "OriginsList";
 // Origin Trial of Origin-Signed HTTP Exchanges (for WebPackage Loading)
 const base::Feature kSignedHTTPExchangeOriginTrial{
     "SignedHTTPExchangeOriginTrial", base::FEATURE_ENABLED_BY_DEFAULT};
-
-// Controls whether SpareRenderProcessHostManager tries to always have a warm
-// spare renderer process around for the most recently requested BrowserContext.
-// This feature is only consulted in site-per-process mode.
-const base::Feature kSpareRendererForSitePerProcess{
-    "SpareRendererForSitePerProcess", base::FEATURE_ENABLED_BY_DEFAULT};
 
 // Throttle Blink timers in out-of-view cross origin frames.
 const base::Feature kTimerThrottlingForHiddenFrames{

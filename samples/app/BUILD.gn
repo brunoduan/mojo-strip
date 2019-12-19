@@ -23,8 +23,10 @@ template("implement_samples_app") {
 
   if (is_android) {
     samples_app_deps += [
+      "//samples/child",
       "//samples/public/android:samples_jni_headers",
       "//samples/master",
+      "//third_party/android_tools:cpu_features",
     ]
   }
 
@@ -33,8 +35,8 @@ template("implement_samples_app") {
     check_includes = false     
                                
     sources = [                
-      #"samples_main_runner_impl.cc",
-      #"samples_main_runner_impl.h",
+      "samples_main_runner_impl.cc",
+      "samples_main_runner_impl.h",
     ]                          
                                
     configs += extra_configs   
@@ -48,8 +50,8 @@ template("implement_samples_app") {
 
   source_set(main_target_name) {
     sources = [  
-      #"samples_service_manager_main_delegate.cc",
-      #"samples_service_manager_main_delegate.h",
+      "samples_service_manager_main_delegate.cc",
+      "samples_service_manager_main_delegate.h",
       "mojo/mojo_init.cc",
       "mojo/mojo_init.h",
     ]          
@@ -68,11 +70,11 @@ template("implement_samples_app") {
   
     if (is_android) {  
       sources += [     
-        #"android/samples_child_process_service_delegate.cc",
-        #"android/samples_jni_onload.cc",
+        "android/samples_child_process_service_delegate.cc",
+        "android/samples_jni_onload.cc",
         "android/samples_main.cc",
-        #"android/library_loader_hooks.cc",
-        #"android/library_loader_hooks.h",
+        "android/library_loader_hooks.cc",
+        "android/library_loader_hooks.h",
       ]        
       deps += [  
         "//mojo/public/java/system:native_support",
@@ -92,6 +94,8 @@ group("samples_app_master_deps") {
 
 group("samples_app_slave_deps") {
   deps = [
+    "//samples/public/slaverer:slaverer_sources",                                                                                                                                                           
+    "//samples/public/utility:utility_sources",
   ]
 }
 
@@ -103,6 +107,7 @@ implement_samples_app("both") {
   deps = [
     ":samples_app_master_deps",
     ":samples_app_slave_deps",
+    "//samples/utility",
   ]
 }
 

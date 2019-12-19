@@ -26,6 +26,19 @@ source_set("common") {
 
   sources = [
     "export.h",
+    "child_process_host_impl.cc",
+    "child_process_host_impl.h",
+    "samples_paths.cc",
+    "in_process_child_thread_params.cc",
+    "in_process_child_thread_params.h",
+    "samples_constants_internal.cc",
+    "samples_constants_internal.h",
+    "samples_switches_internal.cc",
+    "samples_switches_internal.h",
+    "service_manager/service_manager_connection_impl.cc",
+    "service_manager/service_manager_connection_impl.h",
+    "task_scheduler.cc",
+    "task_scheduler.h",
   ]
 
   configs += [
@@ -114,8 +127,13 @@ mojom("mojo_bindings") {
   disable_variants = true
 
   sources = [
-    "slave.mojom",
-    "slave_control.mojom",
+    "associated_interfaces.mojom",
+    "child.mojom",
+    "child_control.mojom",
+    "field_trial_recorder.mojom",
+    "slaver_message_filter.mojom",
+    "slaverer.mojom",
+    "slaverer_host.mojom",
   ]
 
   enabled_features = []

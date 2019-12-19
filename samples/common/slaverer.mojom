@@ -1,0 +1,29 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module samples.mojom;
+
+import "ipc/constants.mojom";
+import "mojo/public/mojom/base/time.mojom";
+import "mojo/public/mojom/base/unguessable_token.mojom";
+import "services/service_manager/public/mojom/interface_provider.mojom";
+import "services/service_manager/public/mojom/service.mojom";
+
+// The primordial Channel-associated interface implemented by a slaver process.
+// This should be used for implementing master-to-slaverer control messages
+// which need to retain FIFO with respect to legacy IPC messages.
+interface Slaverer {
+  // Tells the slaverer to ask its embedder to bind |service_request| to an
+  // embedder-provided slaverer-side service implementation. This is required to
+  // ensure that embedder-provided slaverer-side service is initialized at the
+  // appropriate time.
+  CreateEmbedderSlavererService(service_manager.mojom.Service& service_request);
+
+  // Tells the slaverer process to enter or leave background mode.
+  SetProcessBackgrounded(bool background);
+
+  // Tells the slaverer process to purge and suspend.
+  ProcessPurgeAndSuspend();
+
+};

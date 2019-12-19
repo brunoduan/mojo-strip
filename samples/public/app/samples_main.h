@@ -13,10 +13,10 @@ struct SandboxInterfaceInfo;
 
 namespace samples {
 
-//class BrowserMainParts;
+class MasterMainParts;
 class SamplesMainDelegate;
 
-//using CreatedMainPartsClosure = base::Callback<void(BrowserMainParts*)>;
+using CreatedMainPartsClosure = base::Callback<void(MasterMainParts*)>;
 
 struct SamplesMainParams {
   explicit SamplesMainParams(SamplesMainDelegate* delegate)
@@ -24,7 +24,7 @@ struct SamplesMainParams {
 
   SamplesMainDelegate* delegate;
 
-  //CreatedMainPartsClosure* created_main_parts_closure = nullptr;
+  CreatedMainPartsClosure* created_main_parts_closure = nullptr;
 
 };
 

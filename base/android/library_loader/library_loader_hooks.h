@@ -36,7 +36,7 @@ BASE_EXPORT void SetNativeInitializationHook(
 // Record any pending renderer histogram value as histograms.  Pending values
 // are set by RegisterChromiumAndroidLinkerRendererHistogram and
 // RegisterLibraryPreloaderRendererHistogram.
-BASE_EXPORT void RecordLibraryLoaderRendererHistograms();
+BASE_EXPORT void RecordLibraryLoaderSlavererHistograms();
 
 // Typedef for hook function to be called (indirectly from Java) once the
 // libraries are loaded. The hook function should register the JNI bindings

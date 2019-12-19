@@ -20,10 +20,10 @@ SAMPLES_EXPORT extern const char kAllowInsecureLocalhost[];
 SAMPLES_EXPORT extern const char kAllowLoopbackInPeerConnection[];
 SAMPLES_EXPORT extern const char kAndroidFontsPath[];
 SAMPLES_EXPORT extern const char kBlinkSettings[];
-SAMPLES_EXPORT extern const char kBrowserCrashTest[];
-SAMPLES_EXPORT extern const char kBrowserStartupDialog[];
-SAMPLES_EXPORT extern const char kBrowserSubprocessPath[];
-SAMPLES_EXPORT extern const char kBrowserTest[];
+SAMPLES_EXPORT extern const char kMasterCrashTest[];
+SAMPLES_EXPORT extern const char kMasterStartupDialog[];
+SAMPLES_EXPORT extern const char kMasterSubprocessPath[];
+SAMPLES_EXPORT extern const char kMasterTest[];
 SAMPLES_EXPORT extern const char kDefaultTileWidth[];
 SAMPLES_EXPORT extern const char kDefaultTileHeight[];
 SAMPLES_EXPORT extern const char kDisable2dCanvasAntialiasing[];
@@ -83,7 +83,7 @@ SAMPLES_EXPORT extern const char kDisableReadingFromCanvas[];
 extern const char kDisableRemoteFonts[];
 SAMPLES_EXPORT extern const char kDisableRemotePlaybackAPI[];
 extern const char kDisableRendererAccessibility[];
-SAMPLES_EXPORT extern const char kDisableRendererBackgrounding[];
+SAMPLES_EXPORT extern const char kDisableSlavererBackgrounding[];
 SAMPLES_EXPORT extern const char kDisableResizeLock[];
 SAMPLES_EXPORT extern const char kDisableResourceScheduler[];
 SAMPLES_EXPORT extern const char kDisableSharedWorkers[];
@@ -121,7 +121,7 @@ SAMPLES_EXPORT extern const char kDisableNv12DxgiVideo[];
 SAMPLES_EXPORT extern const char kEnablePinch[];
 SAMPLES_EXPORT extern const char kEnablePluginPlaceholderTesting[];
 SAMPLES_EXPORT extern const char kEnablePreciseMemoryInfo[];
-SAMPLES_EXPORT extern const char kEnablePrintBrowser[];
+SAMPLES_EXPORT extern const char kEnablePrintMaster[];
 SAMPLES_EXPORT extern const char kEnableRGBA4444Textures[];
 SAMPLES_EXPORT extern const char kEnableServiceBinaryLauncher[];
 extern const char kEnableSkiaBenchmarking[];
@@ -205,11 +205,11 @@ SAMPLES_EXPORT extern const char kReducedReferrerGranularity[];
 SAMPLES_EXPORT extern const char kRegisterPepperPlugins[];
 SAMPLES_EXPORT extern const char kRemoteDebuggingPipe[];
 SAMPLES_EXPORT extern const char kRemoteDebuggingPort[];
-SAMPLES_EXPORT extern const char kRendererClientId[];
-extern const char kRendererCmdPrefix[];
-SAMPLES_EXPORT extern const char kRendererProcess[];
-SAMPLES_EXPORT extern const char kRendererProcessLimit[];
-SAMPLES_EXPORT extern const char kRendererStartupDialog[];
+SAMPLES_EXPORT extern const char kSlavererClientId[];
+extern const char kSlavererCmdPrefix[];
+SAMPLES_EXPORT extern const char kSlavererProcess[];
+SAMPLES_EXPORT extern const char kSlavererProcessLimit[];
+SAMPLES_EXPORT extern const char kSlavererStartupDialog[];
 extern const char kSandboxIPCProcess[];
 SAMPLES_EXPORT extern const char kSavePreviousDocumentResources[];
 extern const char kShowPaintRects[];
@@ -260,7 +260,7 @@ SAMPLES_EXPORT extern const char kEnableAdaptiveSelectionHandleOrientation[];
 SAMPLES_EXPORT extern const char kEnableLongpressDragSelection[];
 extern const char kNetworkCountryIso[];
 SAMPLES_EXPORT extern const char kRemoteDebuggingSocketName[];
-SAMPLES_EXPORT extern const char kRendererWaitForJavaDebugger[];
+SAMPLES_EXPORT extern const char kSlavererWaitForJavaDebugger[];
 SAMPLES_EXPORT extern const char kEnableOSKOverscroll[];
 #endif
 
@@ -296,6 +296,8 @@ SAMPLES_EXPORT extern const char kTraceExportEventsToETW[];
 extern const char kIpcDumpDirectory[];
 extern const char kIpcFuzzerTestcase[];
 #endif
+
+SAMPLES_EXPORT extern const char kLang[];
 
 // DON'T ADD RANDOM STUFF HERE. Put it in the main section above in
 // alphabetical order, or in one of the ifdefs (also in order in each section).

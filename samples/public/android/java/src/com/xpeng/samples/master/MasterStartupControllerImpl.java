@@ -325,9 +325,5 @@ public class MasterStartupControllerImpl implements MasterStartupController {
 
     private static native void nativeSetCommandLineFlags(boolean singleProcess);
 
-    // Is this an official build of Chrome? Only native code knows for sure. Official build
-    // knowledge is needed very early in process startup.
-    private static native boolean nativeIsOfficialBuild();
-
     private static native void nativeFlushStartupTasks();
 }

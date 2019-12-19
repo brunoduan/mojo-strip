@@ -87,11 +87,31 @@ jumbo_source_set("common_sources") {
   visibility = [ "//samples/*" ]
 
   sources = [
+    "bind_interface_helpers.h",
+    "main_function_params.h",
+    "child_process_host.h",
+    "child_process_host_delegate.h",
+    "connection_filter.h",
+    "process_type.h",
+    "resource_type.cc",
+    "resource_type.h",
+    "samples_client.cc",
+    "samples_client.h",
+    "samples_constants.h",
     "samples_descriptors.h",
     "samples_features.cc",
     "samples_features.h",
+    "samples_paths.h",
     "samples_switches.cc",
     "samples_switches.h",
+    "sandbox_init.h",
+    "sandboxed_process_launcher_delegate.cc",
+    "sandboxed_process_launcher_delegate.h",
+    "service_manager_connection.h",
+    "simple_connection_filter.cc",
+    "simple_connection_filter.h",
+    "url_constants.cc",
+    "url_constants.h",
   ]
 
   configs += [
@@ -151,6 +171,7 @@ mojom("interfaces") {
   ]
 
   public_deps = [
+    ":resource_type_bindings",
     "//url/mojom:url_mojom_gurl",
     "//url/mojom:url_mojom_origin",
   ]
@@ -164,5 +185,11 @@ mojom("interfaces") {
 mojom("service_names") {
   sources = [
     "service_names.mojom",
+  ]
+}
+
+mojom("resource_type_bindings") {
+  sources = [
+    "resource_type.mojom",
   ]
 }

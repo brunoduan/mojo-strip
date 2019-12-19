@@ -55,7 +55,7 @@ void SetCommandLineFlagsForSandboxType(base::CommandLine* command_line,
       command_line->AppendSwitch(switches::kNoSandboxAndElevatedPrivileges);
       break;
 #endif
-    case SANDBOX_TYPE_RENDERER:
+    case SANDBOX_TYPE_SLAVERER:
       DCHECK(command_line->GetSwitchValueASCII(switches::kProcessType) ==
              switches::kRendererProcess);
       break;
@@ -109,7 +109,7 @@ SandboxType SandboxTypeFromCommandLine(const base::CommandLine& command_line) {
     return SANDBOX_TYPE_NO_SANDBOX;
 
   if (process_type == switches::kRendererProcess)
-    return SANDBOX_TYPE_RENDERER;
+    return SANDBOX_TYPE_SLAVERER;
 
   if (process_type == switches::kUtilityProcess) {
     return UtilitySandboxTypeFromString(

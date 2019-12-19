@@ -5,68 +5,65 @@
 #include "samples/app/samples_service_manager_main_delegate.h"
 
 #include "base/command_line.h"
-#include "content/app/content_main_runner_impl.h"
-#include "content/public/app/content_main_delegate.h"
-#include "content/public/common/content_switches.h"
-#include "content/public/common/service_names.mojom.h"
+#include "samples/app/samples_main_runner_impl.h"
+#include "samples/public/app/samples_main_delegate.h"
+#include "samples/public/common/samples_switches.h"
+#include "samples/public/common/service_names.mojom.h"
 #include "services/service_manager/embedder/switches.h"
 #include "services/service_manager/runner/common/client_util.h"
 
-namespace content {
+namespace samples {
 
-ContentServiceManagerMainDelegate::ContentServiceManagerMainDelegate(
-    const ContentMainParams& params)
-    : content_main_params_(params),
-      content_main_runner_(ContentMainRunnerImpl::Create()) {}
+SamplesServiceManagerMainDelegate::SamplesServiceManagerMainDelegate(
+    const SamplesMainParams& params)
+    : samples_main_params_(params),
+      samples_main_runner_(SamplesMainRunnerImpl::Create()) {}
 
-ContentServiceManagerMainDelegate::~ContentServiceManagerMainDelegate() =
+SamplesServiceManagerMainDelegate::~SamplesServiceManagerMainDelegate() =
     default;
 
-int ContentServiceManagerMainDelegate::Initialize(
+int SamplesServiceManagerMainDelegate::Initialize(
     const InitializeParams& params) {
 #if defined(OS_ANDROID)
-  // May be called twice on Android due to the way browser startup requests are
+  // May be called twice on Android due to the way master startup requests are
   // dispatched by the system.
   if (initialized_)
     return -1;
 #endif
 
 #if defined(OS_MACOSX)
-  content_main_params_.autorelease_pool = params.autorelease_pool;
+  samples_main_params_.autorelease_pool = params.autorelease_pool;
 #endif
 
-  return content_main_runner_->Initialize(content_main_params_);
+  return samples_main_runner_->Initialize(samples_main_params_);
 }
 
-bool ContentServiceManagerMainDelegate::IsEmbedderSubprocess() {
+bool SamplesServiceManagerMainDelegate::IsEmbedderSubprocess() {
   auto type = base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
       switches::kProcessType);
-  return type == switches::kGpuProcess ||
-         type == switches::kPpapiBrokerProcess ||
-         type == switches::kPpapiPluginProcess ||
-         type == switches::kRendererProcess ||
+  return type == switches::kSlavererProcess ||
          type == switches::kUtilityProcess ||
          type == service_manager::switches::kZygoteProcess;
 }
 
-int ContentServiceManagerMainDelegate::RunEmbedderProcess() {
-  return content_main_runner_->Run(start_service_manager_only_);
+int SamplesServiceManagerMainDelegate::RunEmbedderProcess() {
+  return samples_main_runner_->Run(start_service_manager_only_);
 }
 
-void ContentServiceManagerMainDelegate::ShutDownEmbedderProcess() {
+void SamplesServiceManagerMainDelegate::ShutDownEmbedderProcess() {
 #if !defined(OS_ANDROID)
-  content_main_runner_->Shutdown();
+  samples_main_runner_->Shutdown();
 #endif
 }
 
 service_manager::ProcessType
-ContentServiceManagerMainDelegate::OverrideProcessType() {
-  return content_main_params_.delegate->OverrideProcessType();
+SamplesServiceManagerMainDelegate::OverrideProcessType() {
+  return samples_main_params_.delegate->OverrideProcessType();
 }
 
-void ContentServiceManagerMainDelegate::OverrideMojoConfiguration(
+void SamplesServiceManagerMainDelegate::OverrideMojoConfiguration(
     mojo::core::Configuration* config) {
-  // If this is the browser process and there's no remote service manager, we
+  // If this is the master process and there's no remote service manager, we
   // will serve as the global Mojo broker.
   if (!service_manager::ServiceManagerIsRemote() &&
       !base::CommandLine::ForCurrentProcess()->HasSwitch(
@@ -75,16 +72,16 @@ void ContentServiceManagerMainDelegate::OverrideMojoConfiguration(
 }
 
 std::unique_ptr<base::Value>
-ContentServiceManagerMainDelegate::CreateServiceCatalog() {
+SamplesServiceManagerMainDelegate::CreateServiceCatalog() {
   return nullptr;
 }
 
-bool ContentServiceManagerMainDelegate::ShouldLaunchAsServiceProcess(
+bool SamplesServiceManagerMainDelegate::ShouldLaunchAsServiceProcess(
     const service_manager::Identity& identity) {
   return identity.name() != mojom::kPackagedServicesServiceName;
 }
 
-void ContentServiceManagerMainDelegate::AdjustServiceProcessCommandLine(
+void SamplesServiceManagerMainDelegate::AdjustServiceProcessCommandLine(
     const service_manager::Identity& identity,
     base::CommandLine* command_line) {
   base::CommandLine::StringVector args_without_switches;
@@ -92,9 +89,9 @@ void ContentServiceManagerMainDelegate::AdjustServiceProcessCommandLine(
     // Ensure other arguments like URL are not lost.
     args_without_switches = command_line->GetArgs();
 
-    // When launching the browser process, ensure that we don't inherit any
-    // process type flag. When content embeds Service Manager, a process with no
-    // type is launched as a browser process.
+    // When launching the master process, ensure that we don't inherit any
+    // process type flag. When samples embeds Service Manager, a process with no
+    // type is launched as a master process.
     base::CommandLine::SwitchMap switches = command_line->GetSwitches();
     switches.erase(switches::kProcessType);
     *command_line = base::CommandLine(command_line->GetProgram());
@@ -102,7 +99,7 @@ void ContentServiceManagerMainDelegate::AdjustServiceProcessCommandLine(
       command_line->AppendSwitchNative(sw.first, sw.second);
   }
 
-  content_main_params_.delegate->AdjustServiceProcessCommandLine(identity,
+  samples_main_params_.delegate->AdjustServiceProcessCommandLine(identity,
                                                                  command_line);
 
   // Append other arguments back to |command_line| after the second call to
@@ -111,24 +108,24 @@ void ContentServiceManagerMainDelegate::AdjustServiceProcessCommandLine(
     command_line->AppendArgNative(arg);
 }
 
-void ContentServiceManagerMainDelegate::OnServiceManagerInitialized(
+void SamplesServiceManagerMainDelegate::OnServiceManagerInitialized(
     const base::Closure& quit_closure,
     service_manager::BackgroundServiceManager* service_manager) {
-  return content_main_params_.delegate->OnServiceManagerInitialized(
+  return samples_main_params_.delegate->OnServiceManagerInitialized(
       quit_closure, service_manager);
 }
 
 std::unique_ptr<service_manager::Service>
-ContentServiceManagerMainDelegate::CreateEmbeddedService(
+SamplesServiceManagerMainDelegate::CreateEmbeddedService(
     const std::string& service_name) {
   // TODO
 
   return nullptr;
 }
 
-void ContentServiceManagerMainDelegate::SetStartServiceManagerOnly(
+void SamplesServiceManagerMainDelegate::SetStartServiceManagerOnly(
     bool start_service_manager_only) {
   start_service_manager_only_ = start_service_manager_only;
 }
 
-}  // namespace content
+}  // namespace samples

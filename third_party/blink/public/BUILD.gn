@@ -1,0 +1,94 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/buildflag_header.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+
+if (is_android) {
+  import("//build/config/android/rules.gni")
+}
+
+group("blink") {
+  public_deps = [
+    ":blink_headers",
+  ]
+}
+
+# Depend on this target to use public blink API headers for things like enums
+# and public structures without actually linking against any Blink libraries.
+#
+# See public/common/BUILD.gn for the headers that can be referenced both from
+# the browser- and renderer-side components.
+source_set("blink_headers") {
+  sources = [
+    "platform/scheduler/single_thread_idle_task_runner.h",
+    "platform/scheduler/web_thread_scheduler.h",
+    "platform/web_common.h",
+    "platform/web_scoped_virtual_time_pauser.h",
+    "platform/web_string.h",
+  ]
+
+  public_deps = [
+    "//services/service_manager/public/cpp",
+    "//third_party/blink/public/common",
+  ]
+
+  deps = [
+    ":generate_mojo_bindings",
+    "//base:base",
+    "//mojo/public/cpp/bindings:bindings",
+    "//mojo/public/cpp/system:system",
+  ]
+}
+
+# TODO: Move these into blink/public/mojom.
+mojom("mojo_bindings") {
+  visibility = [
+    "//samples/*",
+  ]
+  visibility_blink =
+      [ "//third_party/blink/renderer/platform:blink_platform_public_deps" ]
+  sources = [
+    "platform/content_security_policy.mojom",
+  ]
+  public_deps = [
+    "//mojo/public/mojom/base",
+    "//services/service_manager/public/mojom",
+    "//third_party/blink/public/mojom:mojom_platform",
+    "//url/mojom:url_mojom_gurl",
+    "//url/mojom:url_mojom_origin",
+  ]
+
+  overridden_deps = [ "//third_party/blink/public/mojom:mojom_platform" ]
+  component_deps = [ "//third_party/blink/public/common" ]
+
+  component_output_prefix = "blink_mojo_bindings"
+
+  # The chromium variant must be linked with content and use the same export
+  # settings in component build because of the WebBluetoothDeviceId typemap
+  # inside content.
+  export_class_attribute = "CONTENT_EXPORT"
+  export_define = "CONTENT_IMPLEMENTATION=1"
+  export_header = "samples/common/export.h"
+
+  # Similarly, the blink variant must be linked with the platform component
+  # since it uses types from it in its typemaps.
+  export_class_attribute_blink = "BLINK_PLATFORM_EXPORT"
+  export_define_blink = "BLINK_PLATFORM_IMPLEMENTATION=1"
+  export_header_blink = "third_party/blink/public/platform/web_common.h"
+}
+
+# Note that this intentionally depends on the generator target of the mojom
+# target instead of the mojom target itself directly. This is to ensure that the
+# dependencies are header-only and don't link against any bindings code.
+group("generate_mojo_bindings") {
+  deps = [
+    # It's important to generate both the regular and the Blink variants. The
+    # Blink public API exposes a number of Mojo interfaces; omitting it will
+    # cause non-deterministic compile failures for code that uses the regular
+    # variant of the generated files.
+    ":mojo_bindings_blink_headers",
+    ":mojo_bindings_headers",
+  ]
+}

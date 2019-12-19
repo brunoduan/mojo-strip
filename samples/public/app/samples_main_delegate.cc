@@ -2,81 +2,76 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "content/public/app/content_main_delegate.h"
+#include "samples/public/app/samples_main_delegate.h"
 
 #include "base/logging.h"
 #include "build/build_config.h"
-#include "content/public/gpu/content_gpu_client.h"
-#include "content/public/renderer/content_renderer_client.h"
-#include "content/public/utility/content_utility_client.h"
+#include "samples/public/slaverer/samples_slaverer_client.h"
+#include "samples/public/utility/samples_utility_client.h"
 
 #if !defined(CHROME_MULTIPLE_DLL_CHILD)
-#include "content/public/browser/content_browser_client.h"
+#include "samples/public/master/samples_master_client.h"
 #endif
 
-namespace content {
+namespace samples {
 
-bool ContentMainDelegate::BasicStartupComplete(int* exit_code) {
+bool SamplesMainDelegate::BasicStartupComplete(int* exit_code) {
   return false;
 }
 
-int ContentMainDelegate::RunProcess(
+int SamplesMainDelegate::RunProcess(
     const std::string& process_type,
-    const content::MainFunctionParams& main_function_params) {
+    const samples::MainFunctionParams& main_function_params) {
   return -1;
 }
 
-ui::DataPack* ContentMainDelegate::LoadServiceManifestDataPack() {
-  return nullptr;
-}
-
-int ContentMainDelegate::TerminateForFatalInitializationError() {
+int SamplesMainDelegate::TerminateForFatalInitializationError() {
   CHECK(false);
   return 0;
 }
 
-bool ContentMainDelegate::ShouldEnableProfilerRecording() {
+bool SamplesMainDelegate::ShouldEnableProfilerRecording() {
   return false;
 }
 
-service_manager::ProcessType ContentMainDelegate::OverrideProcessType() {
+service_manager::ProcessType SamplesMainDelegate::OverrideProcessType() {
   return service_manager::ProcessType::kDefault;
 }
 
-void ContentMainDelegate::AdjustServiceProcessCommandLine(
+void SamplesMainDelegate::AdjustServiceProcessCommandLine(
     const service_manager::Identity& identity,
     base::CommandLine* command_line) {}
 
-void ContentMainDelegate::OnServiceManagerInitialized(
+void SamplesMainDelegate::OnServiceManagerInitialized(
     const base::Closure& quit_closure,
     service_manager::BackgroundServiceManager* service_manager) {}
 
-bool ContentMainDelegate::ShouldCreateFeatureList() {
+bool SamplesMainDelegate::ShouldCreateFeatureList() {
   return true;
 }
 
-ContentBrowserClient* ContentMainDelegate::CreateContentBrowserClient() {
+SamplesMasterClient* SamplesMainDelegate::CreateSamplesMasterClient() {
 #if defined(CHROME_MULTIPLE_DLL_CHILD)
   return NULL;
 #else
-  return new ContentBrowserClient();
+  return new SamplesMasterClient();
 #endif
 }
 
-ContentRendererClient* ContentMainDelegate::CreateContentRendererClient() {
+SamplesSlavererClient* SamplesMainDelegate::CreateSamplesSlavererClient() {
 #if defined(CHROME_MULTIPLE_DLL_BROWSER)
   return NULL;
 #else
-  return new ContentRendererClient();
+  return new SamplesSlavererClient();
 #endif
 }
 
-ContentUtilityClient* ContentMainDelegate::CreateContentUtilityClient() {
+SamplesUtilityClient* SamplesMainDelegate::CreateSamplesUtilityClient() {
 #if defined(CHROME_MULTIPLE_DLL_BROWSER)
   return NULL;
 #else
-  return new ContentUtilityClient();
+  return new SamplesUtilityClient();
 #endif
 }
 
-}  // namespace content
+}  // namespace samples

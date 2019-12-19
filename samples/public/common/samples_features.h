@@ -97,7 +97,7 @@ SAMPLES_EXPORT extern const base::Feature kSignedHTTPExchangeAcceptHeader;
 SAMPLES_EXPORT extern const char
     kSignedHTTPExchangeAcceptHeaderFieldTrialParamName[];
 SAMPLES_EXPORT extern const base::Feature kSignedHTTPExchangeOriginTrial;
-SAMPLES_EXPORT extern const base::Feature kSpareRendererForSitePerProcess;
+SAMPLES_EXPORT extern const base::Feature kSpareSlavererForSitePerProcess;
 SAMPLES_EXPORT extern const base::Feature kTimerThrottlingForHiddenFrames;
 SAMPLES_EXPORT extern const base::Feature kTouchpadAsyncPinchEvents;
 SAMPLES_EXPORT extern const base::Feature kTouchpadOverscrollHistoryNavigation;

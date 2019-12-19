@@ -1,9 +1,11 @@
 import("//services/service_manager/public/service_manifest.gni")
 
 public_app_shared_sources = [
+  "samples_jni_onload.h",
   "samples_main.h",
-  #"samples_main_delegate.cc",
-  #"samples_main_delegate.h",
+  "samples_main_delegate.cc",
+  "samples_main_delegate.h",
+  "samples_main_runner.h",
 ]
 
 public_app_shared_deps = [
@@ -28,6 +30,8 @@ if (is_component_build) {
     deps = public_app_shared_deps + [
              "//samples/app:both",
              "//samples/public/master:master_sources",
+             "//samples/public/slaverer:slaverer_sources",
+             "//samples/public/utility:utility_sources",
            ]
 
     allow_circular_includes_from = [
@@ -63,6 +67,8 @@ if (is_component_build) {
              "//samples/app:both",
              "//samples/public/common",
              "//samples/public/master",
+             "//samples/public/slaverer:slaverer_sources",
+             "//samples/public/utility:utility_sources",
            ]
 
     allow_circular_includes_from = [

@@ -36,18 +36,18 @@ const char kAndroidFontsPath[]          = "android-fonts-path";
 const char kBlinkSettings[]                 = "blink-settings";
 
 // Causes the browser process to crash on startup.
-const char kBrowserCrashTest[]              = "crash-test";
+const char kMasterCrashTest[]              = "crash-test";
 
 // Causes the browser process to display a dialog on launch.
-const char kBrowserStartupDialog[]          = "browser-startup-dialog";
+const char kMasterStartupDialog[]          = "browser-startup-dialog";
 
 // Path to the exe to run for the renderer and plugin subprocesses.
-const char kBrowserSubprocessPath[]         = "browser-subprocess-path";
+const char kMasterSubprocessPath[]         = "browser-subprocess-path";
 
 // Tells whether the code is running browser tests (this changes the startup URL
 // used by the samples shell and also disables features that can make tests
 // flaky [like monitoring of memory pressure]).
-const char kBrowserTest[] = "browser-test";
+const char kMasterTest[] = "browser-test";
 
 // Sets the tile size used by composited layers.
 const char kDefaultTileWidth[]              = "default-tile-width";
@@ -241,7 +241,7 @@ const char kDisableRemotePlaybackAPI[]      = "disable-remote-playback-api";
 const char kDisableRendererAccessibility[]  = "disable-renderer-accessibility";
 
 // Prevent renderer process backgrounding when set.
-const char kDisableRendererBackgrounding[]  = "disable-renderer-backgrounding";
+const char kDisableSlavererBackgrounding[]  = "disable-renderer-backgrounding";
 
 // Whether the resize lock is disabled. Default is false. This is generally only
 // useful for tests that want to force disabling.
@@ -373,8 +373,8 @@ const char kEnablePluginPlaceholderTesting[] =
 // also applys to workers.
 const char kEnablePreciseMemoryInfo[] = "enable-precise-memory-info";
 
-// Enables PrintBrowser mode, in which everything renders as though printed.
-const char kEnablePrintBrowser[] = "enable-print-browser";
+// Enables PrintMaster mode, in which everything renders as though printed.
+const char kEnablePrintMaster[] = "enable-print-master";
 
 // Enables RGBA_4444 textures.
 const char kEnableRGBA4444Textures[] = "enable-rgba-4444-textures";
@@ -712,24 +712,24 @@ const char kRemoteDebuggingPipe[] = "remote-debugging-pipe";
 // Enables remote debug over HTTP on the specified port.
 const char kRemoteDebuggingPort[]           = "remote-debugging-port";
 
-const char kRendererClientId[] = "renderer-client-id";
+const char kSlavererClientId[] = "slaverer-client-id";
 
 // The sampless of this flag are prepended to the renderer command line.
 // Useful values might be "valgrind" or "xterm -e gdb --args".
-const char kRendererCmdPrefix[]             = "renderer-cmd-prefix";
+const char kSlavererCmdPrefix[]             = "slaverer-cmd-prefix";
 
 // Causes the process to run as renderer instead of as browser.
-const char kRendererProcess[]               = "renderer";
+const char kSlavererProcess[]               = "slaverer";
 
 // Overrides the default/calculated limit to the number of renderer processes.
 // Very high values for this setting can lead to high memory/resource usage
 // or instability.
-const char kRendererProcessLimit[]          = "renderer-process-limit";
+const char kSlavererProcessLimit[]          = "slaverer-process-limit";
 
 // Causes the renderer process to display a dialog on launch. Passing this flag
 // also adds service_manager::kNoSandbox on Windows non-official builds, since
 // that's needed to show a dialog.
-const char kRendererStartupDialog[]         = "renderer-startup-dialog";
+const char kSlavererStartupDialog[]         = "slaverer-startup-dialog";
 
 // Reduce the default `referer` header's granularity.
 const char kReducedReferrerGranularity[] =
@@ -752,7 +752,7 @@ const char kSavePreviousDocumentResources[] =
 // and study painting behavior.
 const char kShowPaintRects[]                = "show-paint-rects";
 
-// Runs the renderer and plugins in the same process as the browser
+// Runs the slave in the same process as the master
 const char kSingleProcess[]                 = "single-process";
 
 // Enforces a one-site-per-process security policy:
@@ -933,7 +933,7 @@ const char kRemoteDebuggingSocketName[]     = "remote-debugging-socket-name";
 
 // Block ChildProcessMain thread of the renderer's ChildProcessService until a
 // Java debugger is attached.
-const char kRendererWaitForJavaDebugger[] = "renderer-wait-for-java-debugger";
+const char kSlavererWaitForJavaDebugger[] = "slaverer-wait-for-java-debugger";
 
 // Enables overscrolling for the OSK on Android.
 const char kEnableOSKOverscroll[]               = "enable-osk-overscroll";
@@ -1037,6 +1037,8 @@ const char kIpcDumpDirectory[] = "ipc-dump-directory";
 // Specifies the testcase used by the IPC fuzzer.
 const char kIpcFuzzerTestcase[] = "ipc-fuzzer-testcase";
 #endif
+
+const char kLang[] = "lang";
 
 // Don't dump stuff here, follow the same order as the header.
 

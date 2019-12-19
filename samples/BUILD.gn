@@ -8,8 +8,11 @@ config("samples_implementation") {
 }
 
 samples_shared_components = [
+  "//samples/public/child:child_sources",
   "//samples/public/common:common_sources",
   "//samples/public/master:master_sources",
+  "//samples/public/slaverer:slaverer_sources",
+  "//samples/public/utility:utility_sources",
 ]
 
 if (is_component_build) {

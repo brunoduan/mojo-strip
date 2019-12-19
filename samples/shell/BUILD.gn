@@ -2,13 +2,39 @@ import("//mojo/public/tools/bindings/mojom.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
+source_set("android_shell_descriptors") {                                                                                                                                                                   
+  testonly = true
+  sources = [
+    "android/shell_descriptors.h",
+  ]          
+  public_deps = [
+    "//samples/public/common:samples_descriptors",
+  ]          
+}
+
 jumbo_static_library("samples_shell_lib") {
   testonly = true
   sources = [
     "android/shell_launcher.h",
     "android/shell_launcher.cc",
+    "app/shell_main_delegate.cc",
+    "app/shell_main_delegate.h",
+    "common/shell_samples_client.cc",
+    "common/shell_samples_client.h",
+    "master/shell_samples_master_client.cc",
+    "master/shell_samples_master_client.h",
     "master/shell_master_context.h",
     "master/shell_master_context.cc",
+    "master/shell_master_main.cc",
+    "master/shell_master_main.h",
+    "master/shell_master_main_parts.cc",
+    "master/shell_master_main_parts.h",
+    "slaverer/shell_samples_slaverer_client.cc",
+    "slaverer/shell_samples_slaverer_client.h",
+    "utility/shell_samples_utility_client.cc",
+    "utility/shell_samples_utility_client.h",
+    "../public/test/test_service.cc",
+    "../public/test/test_service.h",
   ]                    
 
   configs += [
@@ -18,10 +44,13 @@ jumbo_static_library("samples_shell_lib") {
   ]
 
   public_deps = [
+    ":android_shell_descriptors",
     "//ipc", 
+    "//samples/public/child",
     "//samples/public/app:both",
     "//samples/public/common",
     "//samples/public/master",
+    "//samples/public/utility",
     "//samples/master",
   ]
 
@@ -30,9 +59,12 @@ jumbo_static_library("samples_shell_lib") {
     "//base:base_static",
     "//base/third_party/dynamic_annotations",
     "//services/service_manager/public/cpp",
+    "//services/test/echo:lib",                                                                                                                                                                             
+    "//services/test/echo/public/mojom",
     "//mojo/public/java/system:native_support",
     "//samples/public/common",
     "//samples/public/common:service_names",
+    "//samples/public/test:samples_test_mojo_bindings",
     "//samples/shell/android:samples_shell_jni_headers",
   ]                    
 }

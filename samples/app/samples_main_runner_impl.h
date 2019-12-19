@@ -12,10 +12,10 @@
 #include "base/message_loop/message_loop.h"
 #include "base/metrics/field_trial.h"
 #include "build/build_config.h"
-#include "content/browser/startup_data_impl.h"
-#include "content/public/app/content_main.h"
-#include "content/public/app/content_main_runner.h"
-#include "content/public/common/content_client.h"
+#include "samples/master/startup_data_impl.h"
+#include "samples/public/app/samples_main.h"
+#include "samples/public/app/samples_main_runner.h"
+#include "samples/public/common/samples_client.h"
 
 #if defined(OS_WIN)
 #include "sandbox/win/src/sandbox_types.h"
@@ -27,21 +27,21 @@ namespace base {
 class AtExitManager;
 }  // namespace base
 
-namespace content {
-class ContentMainDelegate;
-struct ContentMainParams;
+namespace samples {
+class SamplesMainDelegate;
+struct SamplesMainParams;
 
-class ContentMainRunnerImpl : public ContentMainRunner {
+class SamplesMainRunnerImpl : public SamplesMainRunner {
  public:
-  static ContentMainRunnerImpl* Create();
+  static SamplesMainRunnerImpl* Create();
 
-  ContentMainRunnerImpl();
-  ~ContentMainRunnerImpl() override;
+  SamplesMainRunnerImpl();
+  ~SamplesMainRunnerImpl() override;
 
   int TerminateForFatalInitializationError();
 
-  // ContentMainRunner:
-  int Initialize(const ContentMainParams& params) override;
+  // SamplesMainRunner:
+  int Initialize(const SamplesMainParams& params) override;
   int Run(bool start_service_manager_only) override;
   void Shutdown() override;
 
@@ -56,10 +56,10 @@ class ContentMainRunnerImpl : public ContentMainRunner {
   bool completed_basic_startup_ = false;
 
   // Used if the embedder doesn't set one.
-  ContentClient empty_content_client_;
+  SamplesClient empty_samples_client_;
 
   // The delegate will outlive this object.
-  ContentMainDelegate* delegate_ = nullptr;
+  SamplesMainDelegate* delegate_ = nullptr;
 
   std::unique_ptr<base::AtExitManager> exit_manager_;
 
@@ -81,9 +81,9 @@ class ContentMainRunnerImpl : public ContentMainRunner {
   std::unique_ptr<base::FieldTrialList> field_trial_list_;
 #endif  // !defined(CHROME_MULTIPLE_DLL_CHILD)
 
-  DISALLOW_COPY_AND_ASSIGN(ContentMainRunnerImpl);
+  DISALLOW_COPY_AND_ASSIGN(SamplesMainRunnerImpl);
 };
 
-}  // namespace content
+}  // namespace samples
 
 #endif  // CONTENT_APP_CONTENT_MAIN_RUNNER_IMPL_H_

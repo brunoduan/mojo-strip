@@ -1,0 +1,46 @@
+# Copyright 2018 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/buildflag_header.gni")
+import("//build/config/compiler/compiler.gni")
+import("//build/config/features.gni")
+import("//third_party/protobuf/proto_library.gni")
+
+# Public common API headers, mojom and libraries that can be linked and
+# referenced both by browser-side and renderer-side components.
+component("common") {
+  output_name = "blink_common"
+
+  public_deps = [
+    "//third_party/blink/public/common:headers",
+    "//third_party/blink/public/mojom:mojom_platform",
+  ]
+  deps = [
+    "//third_party/blink/common",
+  ]
+}
+
+source_set("headers") {
+  visibility = [
+    "//content/*",
+    "//third_party/blink/*",
+    ":*",
+  ]
+
+  sources = [
+    "associated_interfaces/associated_interface_provider.h",
+    "associated_interfaces/associated_interface_registry.h",
+    "launching_process_state.h",
+  ]
+
+  public_deps = [
+    "//third_party/blink/public/mojom:mojom_platform_headers",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/public/cpp/system",
+  ]
+
+}

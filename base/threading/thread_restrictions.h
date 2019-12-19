@@ -39,6 +39,10 @@ class StatisticsProviderImpl;
 namespace chrome_browser_net {
 class Predictor;
 }
+namespace samples {
+class MasterMainLoop;
+class MasterProcessSubThread;
+}
 namespace content {
 class BrowserGpuChannelHostFactory;
 class BrowserMainLoop;
@@ -264,6 +268,7 @@ class BASE_EXPORT ScopedAllowBlocking {
   friend class ui::MaterialDesignController;
   friend class ScopedAllowBlockingForTesting;
   friend class StackSamplingProfiler;
+  friend class samples::MasterProcessSubThread;
 
   ScopedAllowBlocking() EMPTY_BODY_IF_DCHECK_IS_OFF;
   ~ScopedAllowBlocking() EMPTY_BODY_IF_DCHECK_IS_OFF;
@@ -490,6 +495,7 @@ class BASE_EXPORT ThreadRestrictions {
   friend class content::CategorizedWorkerPool;
   friend class remoting::AutoThread;
   friend class ui::WindowResizeHelperMac;
+  friend class samples::MasterMainLoop;
   friend class MessagePumpDefault;
   friend class SimpleThread;
   friend class Thread;

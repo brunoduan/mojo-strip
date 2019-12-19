@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "content/app/content_main_runner_impl.h"
+#include "samples/app/samples_main_runner_impl.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -39,36 +39,24 @@
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/trace_event/trace_event.h"
-#include "components/tracing/common/trace_startup.h"
-#include "content/app/mojo/mojo_init.h"
-#include "content/browser/browser_process_sub_thread.h"
-#include "content/browser/browser_thread_impl.h"
-#include "content/browser/scheduler/browser_task_executor.h"
-#include "content/browser/startup_data_impl.h"
-#include "content/browser/startup_helper.h"
-#include "content/common/content_constants_internal.h"
-#include "content/common/url_schemes.h"
-#include "content/public/app/content_main_delegate.h"
-#include "content/public/common/content_constants.h"
-#include "content/public/common/content_descriptor_keys.h"
-#include "content/public/common/content_features.h"
-#include "content/public/common/content_paths.h"
-#include "content/public/common/content_switches.h"
-#include "content/public/common/main_function_params.h"
-#include "content/public/common/sandbox_init.h"
-#include "gin/v8_initializer.h"
-#include "media/base/media.h"
-#include "media/media_buildflags.h"
-#include "ppapi/buildflags/buildflags.h"
+#include "samples/app/mojo/mojo_init.h"
+#include "samples/master/master_process_sub_thread.h"
+#include "samples/master/master_thread_impl.h"
+#include "samples/master/scheduler/master_task_executor.h"
+#include "samples/master/startup_data_impl.h"
+#include "samples/master/startup_helper.h"
+#include "samples/common/samples_constants_internal.h"
+#include "samples/public/app/samples_main_delegate.h"
+#include "samples/public/common/samples_constants.h"
+#include "samples/public/common/samples_features.h"
+#include "samples/public/common/samples_paths.h"
+#include "samples/public/common/samples_switches.h"
+#include "samples/public/common/main_function_params.h"
+#include "samples/public/common/sandbox_init.h"
 #include "services/service_manager/embedder/switches.h"
 #include "services/service_manager/sandbox/sandbox_type.h"
 #include "services/service_manager/sandbox/switches.h"
 #include "services/service_manager/zygote/common/zygote_buildflags.h"
-#include "third_party/blink/public/common/origin_trials/trial_token_validator.h"
-#include "ui/base/ui_base_paths.h"
-#include "ui/base/ui_base_switches.h"
-#include "ui/display/display_switches.h"
-#include "ui/gfx/switches.h"
 
 #if defined(OS_WIN)
 #include <malloc.h>
@@ -88,7 +76,7 @@
 
 #include "base/file_descriptor_store.h"
 #include "base/posix/global_descriptors.h"
-#include "content/public/common/content_descriptors.h"
+#include "samples/public/common/samples_descriptors.h"
 
 #if !defined(OS_MACOSX)
 #include "services/service_manager/zygote/common/zygote_fork_delegate_linux.h"
@@ -104,7 +92,7 @@
 #include "base/native_library.h"
 #include "base/rand_util.h"
 #include "services/service_manager/zygote/common/common_sandbox_support_linux.h"
-#include "third_party/blink/public/platform/web_font_render_style.h"
+#include "third_party/blink/public/platform/web_font_slaver_style.h"
 #include "third_party/boringssl/src/include/openssl/crypto.h"
 #include "third_party/boringssl/src/include/openssl/rand.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
@@ -112,40 +100,37 @@
 #include "third_party/webrtc_overrides/init_webrtc.h"  // nogncheck
 
 #if BUILDFLAG(ENABLE_PLUGINS)
-#include "content/common/pepper_plugin_list.h"
-#include "content/public/common/pepper_plugin_info.h"
+#include "samples/common/pepper_plugin_list.h"
+#include "samples/public/common/pepper_plugin_info.h"
 #endif
 
 #if BUILDFLAG(ENABLE_LIBRARY_CDMS)
-#include "content/public/common/cdm_info.h"
-#include "content/public/common/content_client.h"
+#include "samples/public/common/cdm_info.h"
+#include "samples/public/common/samples_client.h"
 #endif
 
 #endif  // OS_LINUX
 
 #if !defined(CHROME_MULTIPLE_DLL_BROWSER)
-#include "content/child/field_trial.h"
-#include "content/public/gpu/content_gpu_client.h"
-#include "content/public/renderer/content_renderer_client.h"
-#include "content/public/utility/content_utility_client.h"
+#include "samples/child/field_trial.h"
+#include "samples/public/slaverer/samples_slaverer_client.h"
+#include "samples/public/utility/samples_utility_client.h"
 #endif
 
 #if !defined(CHROME_MULTIPLE_DLL_CHILD)
-#include "content/browser/browser_main.h"
-#include "content/public/browser/content_browser_client.h"
+#include "samples/master/master_main.h"
+#include "samples/public/master/samples_master_client.h"
 #endif
 
 #if !defined(CHROME_MULTIPLE_DLL_BROWSER) && !defined(CHROME_MULTIPLE_DLL_CHILD)
-#include "content/browser/gpu/gpu_main_thread_factory.h"
-#include "content/browser/renderer_host/render_process_host_impl.h"
-#include "content/browser/utility_process_host.h"
-#include "content/gpu/in_process_gpu_thread.h"
-#include "content/renderer/in_process_renderer_thread.h"
-#include "content/utility/in_process_utility_thread.h"
+#include "samples/master/slaverer_host/slaver_process_host_impl.h"
+#include "samples/master/utility_process_host.h"
+#include "samples/slaverer/in_process_slaverer_thread.h"
+#include "samples/utility/in_process_utility_thread.h"
 #endif
 
 #if BUILDFLAG(USE_ZYGOTE_HANDLE)
-#include "content/browser/sandbox_host_linux.h"
+#include "samples/master/sandbox_host_linux.h"
 #include "media/base/media_switches.h"
 #include "services/service_manager/zygote/common/common_sandbox_support_linux.h"
 #include "services/service_manager/zygote/common/zygote_handle.h"
@@ -153,97 +138,20 @@
 #include "services/service_manager/zygote/host/zygote_host_impl_linux.h"
 #endif
 
-namespace content {
-extern int GpuMain(const content::MainFunctionParams&);
-#if BUILDFLAG(ENABLE_PLUGINS)
-extern int PpapiPluginMain(const MainFunctionParams&);
-extern int PpapiBrokerMain(const MainFunctionParams&);
-#endif
-extern int RendererMain(const content::MainFunctionParams&);
+namespace samples {
+extern int SlavererMain(const samples::MainFunctionParams&);
 extern int UtilityMain(const MainFunctionParams&);
-}  // namespace content
+}  // namespace samples
 
-namespace content {
+namespace samples {
 
 namespace {
-
-#if defined(V8_USE_EXTERNAL_STARTUP_DATA) && defined(OS_ANDROID)
-#if defined __LP64__
-#define kV8SnapshotDataDescriptor kV8Snapshot64DataDescriptor
-#else
-#define kV8SnapshotDataDescriptor kV8Snapshot32DataDescriptor
-#endif
-#endif
-
-#if defined(V8_USE_EXTERNAL_STARTUP_DATA)
-void LoadV8SnapshotFile() {
-#if defined(USE_V8_CONTEXT_SNAPSHOT)
-  static constexpr gin::V8Initializer::V8SnapshotFileType kSnapshotType =
-      gin::V8Initializer::V8SnapshotFileType::kWithAdditionalContext;
-  static const char* snapshot_data_descriptor =
-      kV8ContextSnapshotDataDescriptor;
-#else
-  static constexpr gin::V8Initializer::V8SnapshotFileType kSnapshotType =
-      gin::V8Initializer::V8SnapshotFileType::kDefault;
-  static const char* snapshot_data_descriptor = kV8SnapshotDataDescriptor;
-#endif  // USE_V8_CONTEXT_SNAPSHOT
-  ALLOW_UNUSED_LOCAL(kSnapshotType);
-  ALLOW_UNUSED_LOCAL(snapshot_data_descriptor);
-
-#if defined(OS_POSIX) && !defined(OS_MACOSX)
-  base::FileDescriptorStore& file_descriptor_store =
-      base::FileDescriptorStore::GetInstance();
-  base::MemoryMappedFile::Region region;
-  base::ScopedFD fd =
-      file_descriptor_store.MaybeTakeFD(snapshot_data_descriptor, &region);
-  if (fd.is_valid()) {
-    base::File file(fd.release());
-    gin::V8Initializer::LoadV8SnapshotFromFile(std::move(file), &region,
-                                               kSnapshotType);
-    return;
-  }
-#endif  // OS_POSIX && !OS_MACOSX
-
-#if !defined(CHROME_MULTIPLE_DLL_BROWSER)
-  gin::V8Initializer::LoadV8Snapshot(kSnapshotType);
-#endif  // !CHROME_MULTIPLE_DLL_BROWSER
-}
-
-void LoadV8NativesFile() {
-#if defined(OS_POSIX) && !defined(OS_MACOSX)
-  base::FileDescriptorStore& file_descriptor_store =
-      base::FileDescriptorStore::GetInstance();
-  base::MemoryMappedFile::Region region;
-  base::ScopedFD fd =
-      file_descriptor_store.MaybeTakeFD(kV8NativesDataDescriptor, &region);
-  if (fd.is_valid()) {
-    base::File file(fd.release());
-    gin::V8Initializer::LoadV8NativesFromFile(std::move(file), &region);
-    return;
-  }
-#endif  // OS_POSIX && !OS_MACOSX
-#if !defined(CHROME_MULTIPLE_DLL_BROWSER)
-  gin::V8Initializer::LoadV8Natives();
-#endif  // !CHROME_MULTIPLE_DLL_BROWSER
-}
-#endif  // V8_USE_EXTERNAL_STARTUP_DATA
-
-void InitializeV8IfNeeded(const base::CommandLine& command_line,
-                          const std::string& process_type) {
-  if (process_type == switches::kGpuProcess)
-    return;
-
-#if defined(V8_USE_EXTERNAL_STARTUP_DATA)
-  LoadV8SnapshotFile();
-  LoadV8NativesFile();
-#endif  // V8_USE_EXTERNAL_STARTUP_DATA
-}
 
 #if BUILDFLAG(USE_ZYGOTE_HANDLE)
 pid_t LaunchZygoteHelper(base::CommandLine* cmd_line,
                          base::ScopedFD* control_fd) {
-  // Append any switches from the browser process that need to be forwarded on
-  // to the zygote/renderers.
+  // Append any switches from the master process that need to be forwarded on
+  // to the zygote/slaverers.
   static const char* const kForwardSwitches[] = {
       switches::kAndroidFontsPath, switches::kClearKeyCdmPathForTesting,
       switches::kEnableLogging,  // Support, e.g., --enable-logging=stderr.
@@ -251,15 +159,13 @@ pid_t LaunchZygoteHelper(base::CommandLine* cmd_line,
       // the wrong type of main delegate.
       switches::kHeadless,
       // Zygote process needs to know what resources to have loaded when it
-      // becomes a renderer process.
-      switches::kForceDeviceScaleFactor, switches::kLoggingLevel,
-      switches::kPpapiInProcess, switches::kRegisterPepperPlugins, switches::kV,
-      switches::kVModule,
+      // becomes a slaverer process.
+      witches::kLoggingLevel,
   };
   cmd_line->CopySwitchesFrom(*base::CommandLine::ForCurrentProcess(),
                              kForwardSwitches, base::size(kForwardSwitches));
 
-  GetContentClient()->browser()->AppendExtraCommandLineSwitches(cmd_line, -1);
+  GetSamplesClient()->master()->AppendExtraCommandLineSwitches(cmd_line, -1);
 
   // Start up the sandbox host process and get the file descriptor for the
   // sandboxed processes to talk to it.
@@ -273,10 +179,9 @@ pid_t LaunchZygoteHelper(base::CommandLine* cmd_line,
 }
 
 // Initializes the Zygote sandbox host. No thread should be created before this
-// call, as InitializeZygoteSandboxForBrowserProcess() will end-up using fork().
-void InitializeZygoteSandboxForBrowserProcess(
+// call, as InitializeZygoteSandboxForMasterProcess() will end-up using fork().
+void InitializeZygoteSandboxForMasterProcess(
     const base::CommandLine& parsed_command_line) {
-  TRACE_EVENT0("startup", "SetupSandbox");
   // SandboxHostLinux needs to be initialized even if the sandbox and
   // zygote are both disabled. It initializes the sandboxed process socket.
   SandboxHostLinux::GetInstance()->Init();
@@ -295,7 +200,7 @@ void InitializeZygoteSandboxForBrowserProcess(
   // TODO(kerrnel): Investigate doing this without the ZygoteHostImpl as a
   // proxy. It is currently done this way due to concerns about race
   // conditions.
-  service_manager::ZygoteHostImpl::GetInstance()->SetRendererSandboxStatus(
+  service_manager::ZygoteHostImpl::GetInstance()->SetSlavererSandboxStatus(
       generic_zygote->GetSandboxStatus());
 }
 #endif  // BUILDFLAG(USE_ZYGOTE_HANDLE)
@@ -328,7 +233,7 @@ void PreloadPepperPlugins() {
 // the zygote on Linux to get access to the CDMs before entering the sandbox.
 void PreloadLibraryCdms() {
   std::vector<CdmInfo> cdms;
-  GetContentClient()->AddContentDecryptionModules(&cdms, nullptr);
+  GetSamplesClient()->AddSamplesDecryptionModules(&cdms, nullptr);
   for (const auto& cdm : cdms) {
     base::NativeLibraryLoadError error;
     base::NativeLibrary library = base::LoadNativeLibrary(cdm.path, &error);
@@ -391,7 +296,7 @@ void PreSandboxInit() {
     custom.fFontsXml = font_config.c_str();
     custom.fIsolated = true;
 
-    blink::WebFontRenderStyle::SetSkiaFontManager(
+    blink::WebFontSlaverStyle::SetSkiaFontManager(
         SkFontMgr_New_Android(&custom));
   }
 }
@@ -407,30 +312,26 @@ bool IsRootProcess() {
 
 }  // namespace
 
-class ContentClientInitializer {
+class SamplesClientInitializer {
  public:
   static void Set(const std::string& process_type,
-                  ContentMainDelegate* delegate) {
-    ContentClient* content_client = GetContentClient();
+                  SamplesMainDelegate* delegate) {
+    SamplesClient* samples_client = GetSamplesClient();
 #if !defined(CHROME_MULTIPLE_DLL_CHILD)
     if (process_type.empty())
-      content_client->browser_ = delegate->CreateContentBrowserClient();
+      samples_client->master_ = delegate->CreateSamplesMasterClient();
 #endif  // !CHROME_MULTIPLE_DLL_CHILD
 
 #if !defined(CHROME_MULTIPLE_DLL_BROWSER)
     base::CommandLine* cmd = base::CommandLine::ForCurrentProcess();
-    if (process_type == switches::kGpuProcess ||
-        cmd->HasSwitch(switches::kSingleProcess) ||
-        (process_type.empty() && cmd->HasSwitch(switches::kInProcessGPU)))
-      content_client->gpu_ = delegate->CreateContentGpuClient();
 
-    if (process_type == switches::kRendererProcess ||
+    if (process_type == switches::kSlavererProcess ||
         cmd->HasSwitch(switches::kSingleProcess))
-      content_client->renderer_ = delegate->CreateContentRendererClient();
+      samples_client->slaverer_ = delegate->CreateSamplesSlavererClient();
 
     if (process_type == switches::kUtilityProcess ||
         cmd->HasSwitch(switches::kSingleProcess))
-      content_client->utility_ = delegate->CreateContentUtilityClient();
+      samples_client->utility_ = delegate->CreateSamplesUtilityClient();
 #endif  // !CHROME_MULTIPLE_DLL_BROWSER
   }
 };
@@ -447,19 +348,15 @@ struct MainFunction {
 // subprocesses that are launched via the zygote.  This function
 // fills in some process-launching bits around ZygoteMain().
 // Returns the exit code of the subprocess.
-int RunZygote(ContentMainDelegate* delegate) {
+int RunZygote(SamplesMainDelegate* delegate) {
   static const MainFunction kMainFunctions[] = {
-    {switches::kRendererProcess, RendererMain},
+    {switches::kSlavererProcess, SlavererMain},
     {switches::kUtilityProcess, UtilityMain},
-#if BUILDFLAG(ENABLE_PLUGINS)
-    {switches::kPpapiPluginProcess, PpapiPluginMain},
-#endif
   };
 
   std::vector<std::unique_ptr<service_manager::ZygoteForkDelegate>>
       zygote_fork_delegates;
   delegate->ZygoteStarting(&zygote_fork_delegates);
-  media::InitializeMediaLibrary();
 
 #if defined(OS_LINUX)
   PreSandboxInit();
@@ -478,7 +375,7 @@ int RunZygote(ContentMainDelegate* delegate) {
       *base::CommandLine::ForCurrentProcess();
   std::string process_type =
       command_line.GetSwitchValueASCII(switches::kProcessType);
-  ContentClientInitializer::Set(process_type, delegate);
+  SamplesClientInitializer::Set(process_type, delegate);
 
 #if !defined(OS_ANDROID)
   tracing::EnableStartupTracingIfNeeded();
@@ -507,38 +404,37 @@ static void RegisterMainThreadFactories() {
 #if !defined(CHROME_MULTIPLE_DLL_BROWSER) && !defined(CHROME_MULTIPLE_DLL_CHILD)
   UtilityProcessHost::RegisterUtilityMainThreadFactory(
       CreateInProcessUtilityThread);
-  RenderProcessHostImpl::RegisterRendererMainThreadFactory(
-      CreateInProcessRendererThread);
-  content::RegisterGpuMainThreadFactory(CreateInProcessGpuThread);
+  SlaverProcessHostImpl::RegisterSlavererMainThreadFactory(
+      CreateInProcessSlavererThread);
 #else
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   if (command_line.HasSwitch(switches::kSingleProcess)) {
     LOG(FATAL)
-        << "--single-process is not supported in chrome multiple dll browser.";
+        << "--single-process is not supported in chrome multiple dll master.";
   }
   if (command_line.HasSwitch(switches::kInProcessGPU)) {
     LOG(FATAL)
-        << "--in-process-gpu is not supported in chrome multiple dll browser.";
+        << "--in-process-gpu is not supported in chrome multiple dll master.";
   }
 #endif  // !CHROME_MULTIPLE_DLL_BROWSER && !CHROME_MULTIPLE_DLL_CHILD
 }
 
 #if !defined(CHROME_MULTIPLE_DLL_CHILD)
-// Run the main function for browser process.
+// Run the main function for master process.
 // Returns the exit code for this process.
-int RunBrowserProcessMain(const MainFunctionParams& main_function_params,
-                          ContentMainDelegate* delegate) {
+int RunMasterProcessMain(const MainFunctionParams& main_function_params,
+                          SamplesMainDelegate* delegate) {
   int exit_code = delegate->RunProcess("", main_function_params);
 #if defined(OS_ANDROID)
-  // In Android's browser process, the negative exit code doesn't mean the
+  // In Android's master process, the negative exit code doesn't mean the
   // default behavior should be used as the UI message loop is managed by
-  // the Java and the browser process's default behavior is always
+  // the Java and the master process's default behavior is always
   // overridden.
   return exit_code;
 #else
   if (exit_code >= 0)
     return exit_code;
-  return BrowserMain(main_function_params);
+  return MasterMain(main_function_params);
 #endif
 }
 #endif  // !defined(CHROME_MULTIPLE_DLL_CHILD)
@@ -547,16 +443,11 @@ int RunBrowserProcessMain(const MainFunctionParams& main_function_params,
 // Returns the exit code for this process.
 int RunOtherNamedProcessTypeMain(const std::string& process_type,
                                  const MainFunctionParams& main_function_params,
-                                 ContentMainDelegate* delegate) {
+                                 SamplesMainDelegate* delegate) {
 #if !defined(CHROME_MULTIPLE_DLL_BROWSER)
   static const MainFunction kMainFunctions[] = {
-#if BUILDFLAG(ENABLE_PLUGINS)
-    {switches::kPpapiPluginProcess, PpapiPluginMain},
-    {switches::kPpapiBrokerProcess, PpapiBrokerMain},
-#endif  // ENABLE_PLUGINS
     {switches::kUtilityProcess, UtilityMain},
-    {switches::kRendererProcess, RendererMain},
-    {switches::kGpuProcess, GpuMain},
+    {switches::kSlavererProcess, SlavererMain},
   };
 
   for (size_t i = 0; i < base::size(kMainFunctions); ++i) {
@@ -581,27 +472,26 @@ int RunOtherNamedProcessTypeMain(const std::string& process_type,
 }
 
 // static
-ContentMainRunnerImpl* ContentMainRunnerImpl::Create() {
-  return new ContentMainRunnerImpl();
+SamplesMainRunnerImpl* SamplesMainRunnerImpl::Create() {
+  return new SamplesMainRunnerImpl();
 }
 
-ContentMainRunnerImpl::ContentMainRunnerImpl() {
+SamplesMainRunnerImpl::SamplesMainRunnerImpl() {
 #if defined(OS_WIN)
   memset(&sandbox_info_, 0, sizeof(sandbox_info_));
 #endif
 }
 
-ContentMainRunnerImpl::~ContentMainRunnerImpl() {
+SamplesMainRunnerImpl::~SamplesMainRunnerImpl() {
   if (is_initialized_ && !is_shutdown_)
     Shutdown();
 }
 
-int ContentMainRunnerImpl::TerminateForFatalInitializationError() {
+int SamplesMainRunnerImpl::TerminateForFatalInitializationError() {
   return delegate_->TerminateForFatalInitializationError();
 }
 
-int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
-  ui_task_ = params.ui_task;
+int SamplesMainRunnerImpl::Initialize(const SamplesMainParams& params) {
   created_main_parts_closure_ = params.created_main_parts_closure;
 
 #if defined(OS_WIN)
@@ -616,7 +506,6 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
   // See note at the initialization of ExitManager, below; basically,
   // only Android builds have the ctor/dtor handlers set up to use
   // TRACE_EVENT right away.
-  TRACE_EVENT0("startup,benchmark,rail", "ContentMainRunnerImpl::Initialize");
 #endif  // OS_ANDROID
 
   base::GlobalDescriptors* g_fds = base::GlobalDescriptors::GetInstance();
@@ -650,8 +539,8 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
 // TRACE_EVENT methods on Linux or iOS builds till after we set this up.
 #if !defined(OS_ANDROID)
   if (!ui_task_) {
-    // When running browser tests, don't create a second AtExitManager as that
-    // interfers with shutdown when objects created before ContentMain is
+    // When running master tests, don't create a second AtExitManager as that
+    // interfers with shutdown when objects created before SamplesMain is
     // called are destructed when it returns.
     exit_manager_.reset(new base::AtExitManager);
   }
@@ -662,13 +551,7 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
     return exit_code;
   completed_basic_startup_ = true;
 
-  // We will need to use data from resources.pak in later cl, so load the file
-  // now.
-  if (IsRootProcess()) {
-    ui::DataPack* data_pack = delegate_->LoadServiceManifestDataPack();
-    // TODO(ranj): Read manifest from this data pack.
-    ignore_result(data_pack);
-  }
+  if (IsRootProcess()) {}
 
   const base::CommandLine& command_line =
       *base::CommandLine::ForCurrentProcess();
@@ -685,48 +568,20 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
   }
 #endif
 
-  if (!GetContentClient())
-    SetContentClient(&empty_content_client_);
-  ContentClientInitializer::Set(process_type, delegate_);
+  if (!GetSamplesClient())
+    SetSamplesClient(&empty_samples_client_);
+  SamplesClientInitializer::Set(process_type, delegate_);
 
 #if !defined(OS_ANDROID)
     // Enable startup tracing asap to avoid early TRACE_EVENT calls being
     // ignored. For Android, startup tracing is enabled in an even earlier place
-    // content/app/android/library_loader_hooks.cc.
+    // samples/app/android/library_loader_hooks.cc.
     //
     // Startup tracing flags are not (and should not) passed to Zygote
     // processes. We will enable tracing when forked, if needed.
     if (process_type != service_manager::switches::kZygoteProcess)
       tracing::EnableStartupTracingIfNeeded();
 #endif  // !OS_ANDROID
-
-#if defined(OS_WIN)
-    // Enable exporting of events to ETW if requested on the command line.
-    if (command_line.HasSwitch(switches::kTraceExportEventsToETW))
-      base::trace_event::TraceEventETWExport::EnableETWExport();
-#endif  // OS_WIN
-
-#if !defined(OS_ANDROID)
-    // Android tracing started at the beginning of the method.
-    // Other OSes have to wait till we get here in order for all the memory
-    // management setup to be completed.
-    TRACE_EVENT0("startup,benchmark,rail", "ContentMainRunnerImpl::Initialize");
-#endif  // !OS_ANDROID
-
-#if defined(OS_MACOSX)
-    // We need to allocate the IO Ports before the Sandbox is initialized or
-    // the first instance of PowerMonitor is created.
-    // It's important not to allocate the ports for processes which don't
-    // register with the power monitor - see https://crbug.com/88867.
-    if (process_type.empty() ||
-        delegate_->ProcessRegistersWithSystemProcess(process_type)) {
-      base::PowerMonitorDeviceSource::AllocateSystemIOPorts();
-    }
-
-    if (!process_type.empty() && delegate_->ShouldSendMachPort(process_type)) {
-      base::MachPortBroker::ChildSendTaskPortToParent(kMachBootstrapName);
-    }
-#endif
 
     // If we are on a platform where the default allocator is overridden (shim
     // layer on windows, tcmalloc on Linux Desktop) smoke-tests that the
@@ -736,13 +591,13 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
     if (!process_type.empty()) {
-      // When you hit Ctrl-C in a terminal running the browser
+      // When you hit Ctrl-C in a terminal running the master
       // process, a SIGINT is delivered to the entire process group.
-      // When debugging the browser process via gdb, gdb catches the
-      // SIGINT for the browser process (and dumps you back to the gdb
+      // When debugging the master process via gdb, gdb catches the
+      // SIGINT for the master process (and dumps you back to the gdb
       // console) but doesn't for the child processes, killing them.
       // The fix is to have child processes ignore SIGINT; they'll die
-      // on their own when the browser process goes away.
+      // on their own when the master process goes away.
       //
       // Note that we *can't* rely on BeingDebugged to catch this case because
       // we are the child process, which is not being debugged.
@@ -753,7 +608,6 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
 #endif
 
     RegisterPathProvider();
-    RegisterContentSchemes(true);
 
 #if defined(OS_ANDROID) && (ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE)
     int icudata_fd = g_fds->MaybeGet(kAndroidICUDataDescriptor);
@@ -771,14 +625,6 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
       return TerminateForFatalInitializationError();
 #endif  // OS_ANDROID && (ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE)
 
-    InitializeV8IfNeeded(command_line, process_type);
-
-    blink::TrialTokenValidator::SetOriginTrialPolicyGetter(
-        base::BindRepeating([]() -> blink::OriginTrialPolicy* {
-          if (auto* client = GetContentClient())
-            return client->GetOriginTrialPolicy();
-          return nullptr;
-        }));
 
 #if !defined(OFFICIAL_BUILD)
 #if defined(OS_WIN)
@@ -811,11 +657,11 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
     bool v2_enabled = base::CommandLine::ForCurrentProcess()->HasSwitch(
         sandbox::switches::kSeatbeltClientName);
 
-    if (process_type == switches::kRendererProcess ||
-        process_type == switches::kPpapiPluginProcess || v2_enabled ||
+    if (process_type == switches::kSlavererProcess ||
+        v2_enabled ||
         delegate_->DelaySandboxInitialization(process_type)) {
-      // On OS X the renderer sandbox needs to be initialized later in the
-      // startup sequence in RendererMainPlatformDelegate::EnableSandbox().
+      // On OS X the slaverer sandbox needs to be initialized later in the
+      // startup sequence in SlavererMainPlatformDelegate::EnableSandbox().
     } else {
       if (!InitializeSandbox())
         return TerminateForFatalInitializationError();
@@ -829,7 +675,7 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
       // The sandbox host needs to be initialized before forking a thread to
       // start the ServiceManager, and after setting up the sandbox and invoking
       // SandboxInitialized().
-      InitializeZygoteSandboxForBrowserProcess(
+      InitializeZygoteSandboxForMasterProcess(
           *base::CommandLine::ForCurrentProcess());
     }
 #endif  // BUILDFLAG(USE_ZYGOTE_HANDLE)
@@ -838,7 +684,7 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
     return -1;
 }
 
-int ContentMainRunnerImpl::Run(bool start_service_manager_only) {
+int SamplesMainRunnerImpl::Run(bool start_service_manager_only) {
   DCHECK(is_initialized_);
   DCHECK(!is_shutdown_);
   const base::CommandLine& command_line =
@@ -867,16 +713,16 @@ int ContentMainRunnerImpl::Run(bool start_service_manager_only) {
 
 #if !defined(CHROME_MULTIPLE_DLL_CHILD)
   // The thread used to start the ServiceManager is handed-off to
-  // BrowserMain() which may elect to promote it (e.g. to BrowserThread::IO).
+  // MasterMain() which may elect to promote it (e.g. to MasterThread::IO).
   if (process_type.empty()) {
     startup_data_ = std::make_unique<StartupDataImpl>();
-    startup_data_->thread = BrowserProcessSubThread::CreateIOThread();
+    startup_data_->thread = MasterProcessSubThread::CreateIOThread();
     main_params.startup_data = startup_data_.get();
 
-    if (GetContentClient()->browser()->ShouldCreateTaskScheduler()) {
+    if (GetSamplesClient()->master()->ShouldCreateTaskScheduler()) {
       // Create and start the TaskScheduler early to allow upcoming code to use
       // the post_task.h API.
-      base::TaskScheduler::Create("Browser");
+      base::TaskScheduler::Create("Master");
     }
 
     delegate_->PreCreateMainMessageLoop();
@@ -890,8 +736,8 @@ int ContentMainRunnerImpl::Run(bool start_service_manager_only) {
 #endif
 
     // Create a MessageLoop if one does not already exist for the current
-    // thread. This thread won't be promoted as BrowserThread::UI until
-    // BrowserMainLoop::MainMessageLoopStart().
+    // thread. This thread won't be promoted as MasterThread::UI until
+    // MasterMainLoop::MainMessageLoopStart().
     if (!base::MessageLoopCurrentForUI::IsSet())
       main_message_loop_ = std::make_unique<base::MessageLoopForUI>();
 
@@ -902,23 +748,23 @@ int ContentMainRunnerImpl::Run(bool start_service_manager_only) {
 
     delegate_->PostEarlyInitialization();
 
-    if (GetContentClient()->browser()->ShouldCreateTaskScheduler()) {
+    if (GetSamplesClient()->master()->ShouldCreateTaskScheduler()) {
       // The FeatureList needs to create before starting the TaskScheduler.
-      StartBrowserTaskScheduler();
+      StartMasterTaskScheduler();
     }
 
-    // Register the TaskExecutor for posting task to the BrowserThreads. It is
-    // incorrect to post to a BrowserThread before this point.
-    BrowserTaskExecutor::Create();
+    // Register the TaskExecutor for posting task to the MasterThreads. It is
+    // incorrect to post to a MasterThread before this point.
+    MasterTaskExecutor::Create();
 
-    return RunBrowserProcessMain(main_params, delegate_);
+    return RunMasterProcessMain(main_params, delegate_);
   }
 #endif  // !defined(CHROME_MULTIPLE_DLL_CHILD)
 
   return RunOtherNamedProcessTypeMain(process_type, main_params, delegate_);
 }
 
-void ContentMainRunnerImpl::Shutdown() {
+void SamplesMainRunnerImpl::Shutdown() {
   DCHECK(is_initialized_);
   DCHECK(!is_shutdown_);
 
@@ -949,8 +795,8 @@ void ContentMainRunnerImpl::Shutdown() {
 }
 
 // static
-ContentMainRunner* ContentMainRunner::Create() {
-  return ContentMainRunnerImpl::Create();
+SamplesMainRunner* SamplesMainRunner::Create() {
+  return SamplesMainRunnerImpl::Create();
 }
 
-}  // namespace content
+}  // namespace samples

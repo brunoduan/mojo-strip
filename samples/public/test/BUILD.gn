@@ -1,0 +1,9 @@
+import("//mojo/public/tools/bindings/mojom.gni")
+
+mojom("samples_test_mojo_bindings") {
+  sources = [
+    "test_service.mojom",                                                                                                                                                                    
+  ]  
+  public_deps = [
+  ]  
+}

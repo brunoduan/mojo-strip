@@ -32,7 +32,7 @@ enum SandboxType {
 #endif
 
   // Renderer or worker process. Most common case.
-  SANDBOX_TYPE_RENDERER,
+  SANDBOX_TYPE_SLAVERER,
 
   // Utility process is as restrictive as the worker process except full
   // access is allowed to one configurable directory.

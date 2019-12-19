@@ -1,0 +1,108 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/chromecast_build.gni")
+import("//build/config/features.gni")
+import("//build/config/jumbo.gni")
+import("//build/config/ui.gni")
+import("//build/split_static_library.gni")
+import("//samples/common/features.gni")
+import("//tools/ipc_fuzzer/ipc_fuzzer.gni")
+
+if (is_component_build) {
+  link_target_type = "jumbo_source_set"
+} else {
+  link_target_type = "jumbo_split_static_library"
+}
+
+target(link_target_type, "slaverer") {
+  # Only the public target should depend on this. All other targets (even
+  # internal samples ones) should depend on the public one.
+  visibility = [
+    "//samples/app:*",
+    "//samples/public/slaverer:slaverer_sources",
+  ]
+
+  sources = [
+    #"samples_security_policy_util.cc",
+    #"samples_security_policy_util.h",
+    "in_process_slaverer_thread.cc",
+    "in_process_slaverer_thread.h",
+    #"mojo/blink_interface_provider_impl.cc",
+    #"mojo/blink_interface_provider_impl.h",
+    #"mojo/blink_interface_registry_impl.cc",
+    #"mojo/blink_interface_registry_impl.h",
+    "seccomp_sandbox_status_android.cc",
+    "seccomp_sandbox_status_android.h",
+    "slaverer_main.cc",
+    "slaverer_main_platform_delegate.h",
+    "slaverer_main_platform_delegate_android.cc",
+    "slaver_process.cc",
+    "slaver_process.h",
+    "slaver_process_impl.cc",
+    "slaver_process_impl.h",
+    "slaver_thread_impl.cc",
+    "slaver_thread_impl.h",
+  ]
+
+  if (!is_component_build) {
+    if (is_win && is_official_build) {
+      split_count = 2  # In certain configurations a full slaverer.lib can
+                       # be 2+ GB which breaks some Windows tools.
+    } else {
+      split_count = 1
+    }
+  }
+
+  configs += [
+    "//samples:samples_implementation",
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]
+  defines = []
+
+  public_deps = [
+    "//samples/common:mojo_bindings",
+    "//samples/public/common:common_sources",
+    "//ipc",
+  ]
+
+  deps = [
+    "//base:i18n",
+    "//samples/child",
+    "//samples/common",
+    "//samples/common:buildflags",
+    "//samples/public/child:child_sources",
+    "//samples/public/common:service_names",
+    "//mojo/public/cpp/bindings",
+    "//sandbox",
+    "//services/service_manager/public/cpp",
+    "//services/service_manager/public/mojom",
+    "//third_party/blink/public:blink",
+    "//third_party/blink/public:mojo_bindings",
+  ]
+  allow_circular_includes_from = []
+
+  if (is_android) {
+    # Add back the Linux file which Android shares.
+    set_sources_assignment_filter([])
+
+    deps += [
+      "//third_party/android_tools:cpu_features",
+    ]
+  }
+
+  if (is_linux) {
+    deps += [
+      "//services/service_manager/zygote",
+    ]
+  }
+
+  if (is_linux || is_android) {
+    deps += [ "//sandbox:sandbox_buildflags" ]
+  }
+
+  if (enable_ipc_fuzzer) {
+    configs += [ "//tools/ipc_fuzzer:ipc_fuzzer_config" ]
+  }
+}

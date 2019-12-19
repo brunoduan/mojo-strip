@@ -12,6 +12,7 @@ jumbo_source_set("master") {
 
   configs += [
     "//build/config:precompiled_headers",
+    "//samples:samples_implementation",
   ]
 
   defines = []
@@ -22,6 +23,7 @@ jumbo_source_set("master") {
     "//base",
     "//base:base_static",
     "//base/third_party/dynamic_annotations",
+    "//components/variations",
     "//mojo/core/embedder",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/platform",
@@ -29,6 +31,12 @@ jumbo_source_set("master") {
     "//samples/common",
     "//samples/common:buildflags",
     "//samples/common:mojo_bindings",
+    "//services/data_decoder/public/cpp",
+    "//services/data_decoder/public/mojom",
+    "//services/file:lib",
+    "//services/file/public/mojom",
+    "//services/samples:impl",
+    "//services/samples/public/mojom",
     "//samples/public/common:common_sources",
     "//services/service_manager/embedder:embedder_result_codes",
     "//services/service_manager/public/cpp",
@@ -48,6 +56,69 @@ jumbo_source_set("master") {
   ]
 
   sources = [
+    "../common/service_manager/child_connection.cc",
+    "../common/service_manager/child_connection.h",
+    "android/launcher_thread.cc",
+    "android/launcher_thread.h",
+    "android/samples_feature_list.cc",
+    "android/samples_feature_list.h",
+    "android/master_startup_controller.cc",
+    "android/master_startup_controller.h",
+    "android/samples_startup_flags.cc",
+    "android/samples_startup_flags.h",
+    "bad_message.cc",
+    "bad_message.h",
+    "child_process_launcher.cc",
+    "child_process_launcher.h",
+    "child_process_launcher_helper.cc",
+    "child_process_launcher_helper.h",
+    "child_process_launcher_helper_android.cc",
+    "child_process_security_policy_impl.cc",
+    "child_process_security_policy_impl.h",
+    "isolated_origin_util.cc",
+    "isolated_origin_util.h",
     "master_context.cc",
+    "master_main.cc",
+    "master_main.h",
+    "master_main_loop.cc",
+    "master_main_loop.h",
+    "master_main_runner_impl.cc",
+    "master_main_runner_impl.h",
+    "master_child_process_host_impl.cc",
+    "master_child_process_host_impl.h",
+    "master_process_sub_thread.cc",
+    "master_process_sub_thread.h",
+    "master_thread_impl.cc",
+    "master_thread_impl.h",
+    "notification_service_impl.cc",
+    "notification_service_impl.h",
+    "samples_service_delegate_impl.cc",
+    "samples_service_delegate_impl.h",
+    "scheduler/master_task_executor.cc",
+    "scheduler/master_task_executor.h",
+    "service_manager/common_master_interfaces.cc",
+    "service_manager/common_master_interfaces.h",
+    "service_manager/service_manager_context.cc",
+    "service_manager/service_manager_context.h",
+    "slaverer_host/slaver_process_host_impl.cc",
+    "slaverer_host/slaver_process_host_impl.h",
+    "startup_data_impl.cc",
+    "startup_data_impl.h",
+    "startup_helper.cc",
+    "startup_helper.h",
+    "startup_task_runner.cc",
+    "startup_task_runner.h",
+    "utility_process_host.cc",
+    "utility_process_host.h",
+    "utility_process_host_client.h",
   ]
+
+  if (is_posix) {
+    sources += [
+      "child_process_launcher_helper_posix.cc",
+      "child_process_launcher_helper_posix.h",
+      "posix_file_descriptor_info_impl.cc",
+      "posix_file_descriptor_info_impl.h",
+    ]
+  }
 }

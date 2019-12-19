@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CONTENT_PUBLIC_APP_CONTENT_MAIN_DELEGATE_H_
-#define CONTENT_PUBLIC_APP_CONTENT_MAIN_DELEGATE_H_
+#ifndef SAMPLES_PUBLIC_APP_SAMPLES_MAIN_DELEGATE_H_
+#define SAMPLES_PUBLIC_APP_SAMPLES_MAIN_DELEGATE_H_
 
 #include <memory>
 #include <string>
@@ -11,7 +11,7 @@
 
 #include "base/callback_forward.h"
 #include "build/build_config.h"
-#include "samples/common/samples_export.h"
+#include "samples/common/export.h"
 #include "services/service_manager/embedder/process_type.h"
 
 namespace base {
@@ -23,20 +23,16 @@ class BackgroundServiceManager;
 class Identity;
 }  // namespace service_manager
 
-namespace ui {
-class DataPack;
-}
-
 namespace samples {
 
-class ContentBrowserClient;
-class ContentRendererClient;
-class ContentUtilityClient;
+class SamplesMasterClient;
+class SamplesSlavererClient;
+class SamplesUtilityClient;
 struct MainFunctionParams;
 
-class CONTENT_EXPORT ContentMainDelegate {
+class SAMPLES_EXPORT SamplesMainDelegate {
  public:
-  virtual ~ContentMainDelegate() {}
+  virtual ~SamplesMainDelegate() {}
 
   // Tells the embedder that the absolute basic startup has been done, i.e.
   // it's now safe to create singletons and check the command line. Return true
@@ -60,10 +56,6 @@ class CONTENT_EXPORT ContentMainDelegate {
 
   // Called right before the process exits.
   virtual void ProcessExiting(const std::string& process_type) {}
-
-  // This loads the service manifest datapack, takes its ownership and returns
-  // the pointer to it.
-  virtual ui::DataPack* LoadServiceManifestDataPack();
 
   // TODO(vadimt, yiyaoliu): Remove this function once crbug.com/453640 is
   // fixed.
@@ -110,16 +102,16 @@ class CONTENT_EXPORT ContentMainDelegate {
   virtual void PostEarlyInitialization() {}
 
  protected:
-  friend class ContentClientInitializer;
+  friend class SamplesClientInitializer;
 
   // Called once per relevant process type to allow the embedder to customize
   // content. If an embedder wants the default (empty) implementation, don't
   // override this.
-  virtual ContentBrowserClient* CreateContentBrowserClient();
-  virtual ContentRendererClient* CreateContentRendererClient();
-  virtual ContentUtilityClient* CreateContentUtilityClient();
+  virtual SamplesMasterClient* CreateSamplesMasterClient();
+  virtual SamplesSlavererClient* CreateSamplesSlavererClient();
+  virtual SamplesUtilityClient* CreateSamplesUtilityClient();
 };
 
 }  // namespace samples
 
-#endif  // CONTENT_PUBLIC_APP_CONTENT_MAIN_DELEGATE_H_
+#endif  // SAMPLES_PUBLIC_APP_SAMPLES_MAIN_DELEGATE_H_

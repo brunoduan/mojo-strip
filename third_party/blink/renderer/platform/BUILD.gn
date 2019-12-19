@@ -1,0 +1,71 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/buildflag_header.gni")
+import("//build/compiled_action.gni")
+import("//build/config/features.gni")
+import("//build/config/jumbo.gni")
+import("//third_party/blink/renderer/config.gni")
+
+# Most targets in this file are private actions so use that as the default.
+visibility = [ ":*" ]
+
+source_set("platform_export") {
+  sources = [
+    "platform_export.h",
+  ]
+
+  visibility = []  # Allow re-assignment of list.
+  visibility = [
+    ":platform",
+    "//mojo/public/cpp/bindings:wtf_support",
+  ]
+}
+
+config("blink_platform_config") {                                                                                                                                                                           
+  configs = [
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]      
+}
+
+config("blink_platform_implementation") {
+  defines = [ "BLINK_PLATFORM_IMPLEMENTATION=1" ]
+}
+
+jumbo_component("platform") {
+  visibility = []  # Allow re-assignment of list.
+  visibility = [
+    "//third_party/blink/*",
+    "//url/mojom:url_mojom_origin_blink",
+    "//url/mojom:url_mojom_gurl_blink",
+  ]
+  output_name = "blink_platform"
+
+  sources = [
+    "mojo/interface_invalidator.cc",
+    "mojo/interface_invalidator.h",
+    #"mojo/mojo_helper.h",
+    #"mojo/revocable_binding.h",
+    "mojo/revocable_interface_ptr.h",
+  ]
+
+  configs += [
+    ":blink_platform_config",
+    ":blink_platform_implementation",
+  ]
+
+  include_dirs = []
+
+  public_deps = [
+    #"//third_party/blink/renderer/platform/scheduler",
+  ]
+  deps = [
+    ":platform_export",
+    "//mojo/public/cpp/base",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/bindings:wtf_support",
+    "//services/service_manager/public/cpp",
+  ]
+}
