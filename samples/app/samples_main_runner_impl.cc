@@ -264,7 +264,6 @@ void PreSandboxInit() {
   // Ensure access to the library CDMs before the sandbox is turned on.
   PreloadLibraryCdms();
 #endif
-  InitializeWebRtcModule();
 
   // Set the android SkFontMgr for blink. We need to ensure this is done
   // before the sandbox is initialized to allow the font manager to access
@@ -320,6 +319,7 @@ class SamplesClientInitializer {
 #if !defined(CHROME_MULTIPLE_DLL_CHILD)
     if (process_type.empty())
       samples_client->master_ = delegate->CreateSamplesMasterClient();
+
 #endif  // !CHROME_MULTIPLE_DLL_CHILD
 
 #if !defined(CHROME_MULTIPLE_DLL_BROWSER)

@@ -13,6 +13,7 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.xpeng.samples.shell.ShellLauncher;
+import com.xpeng.samples_public.master.MasterStartupController;
 
 import org.chromium.base.CommandLine;
 import org.chromium.base.MemoryPressureListener;
@@ -35,19 +36,51 @@ public class SamplesShellActivity extends Activity {
         if (commandLineParams != null) {
           CommandLine.getInstance().appendSwitchesAndArguments(commandLineParams);
         }
+        String [] sp = new String[] {"--single-process"};
+        CommandLine.getInstance().appendSwitchesAndArguments(sp);
       }
 
 	    setContentView(R.layout.samples_shell_activity);
 
 	    try {
-            LibraryLoader.getInstance().ensureInitialized(LibraryProcessType.PROCESS_BROWSER);
+            LibraryLoader.getInstance().ensureInitialized(LibraryProcessType.PROCESS_MASTER);
       } catch (ProcessInitException e) {
         Log.e(TAG, "ContentView initialization failed.", e);
         System.exit(-1);
         return;
       }
 
-      ShellLauncher.getInstance().launchShell();
+      try {
+          MasterStartupController.get(LibraryProcessType.PROCESS_MASTER)
+                  .startMasterProcessesAsync(
+                          false,
+                          new MasterStartupController.StartupCallback() {
+                              @Override
+                              public void onSuccess() {
+                                  finishInitialization(savedInstanceState);
+                              }
+
+                              @Override
+                              public void onFailure() {
+                                    initializationFailed();
+                                }
+                          });
+      } catch (ProcessInitException e) {
+          Log.e(TAG, "Unable to load native library.", e);
+          System.exit(-1);
+      }
+    }
+
+    private void finishInitialization(Bundle savedInstanceState) {
+        ShellLauncher.getInstance().launchShell();
+    }
+
+    private void initializationFailed() {
+        Log.e(TAG, "ContentView initialization failed.");
+        Toast.makeText(SamplesShellActivity.this,
+                R.string.master_process_initialization_failed,
+                Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     @Override

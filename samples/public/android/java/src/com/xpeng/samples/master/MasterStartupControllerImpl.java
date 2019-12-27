@@ -75,6 +75,9 @@ public class MasterStartupControllerImpl implements MasterStartupController {
     // Whether the async startup of the master process has started.
     private boolean mHasStartedInitializingMasterProcess;
 
+    // Whether tasks that occur after resource extraction have been completed.
+    private boolean mPostResourceExtractionTasksCompleted;
+
     private boolean mHasCalledSamplesStart;
 
     // Whether the async startup of the master process is complete.
@@ -99,18 +102,20 @@ public class MasterStartupControllerImpl implements MasterStartupController {
     // Whether ServiceManager is started.
     private boolean mServiceManagerStarted;
 
-    MasterStartupControllerImpl() {
+    MasterStartupControllerImpl(int libraryProcessType) {
         mAsyncStartupCallbacks = new ArrayList<>();
         mServiceManagerCallbacks = new ArrayList<>();
-        mLibraryProcessType = LibraryProcessType.PROCESS_BROWSER;
+        mLibraryProcessType = libraryProcessType;
     }
 
-    public static MasterStartupController get() {
+    public static MasterStartupController get(int libraryProcessType) {
         assert ThreadUtils.runningOnUiThread() : "Tried to start the master on the wrong thread.";
         ThreadUtils.assertOnUiThread();
+        assert LibraryProcessType.PROCESS_MASTER == libraryProcessType;
         if (sInstance == null) {
-            sInstance = new MasterStartupControllerImpl();
+            sInstance = new MasterStartupControllerImpl(libraryProcessType);
         }
+        assert sInstance.mLibraryProcessType == libraryProcessType : "Wrong process type";
         return sInstance;
     }
 
@@ -163,7 +168,7 @@ public class MasterStartupControllerImpl implements MasterStartupController {
     public void startMasterProcessesSync(boolean singleProcess) throws ProcessInitException {
         // If already started skip to checking the result
         if (!mFullMasterStartupDone) {
-            if (!mHasStartedInitializingMasterProcess) {
+            if (!mHasStartedInitializingMasterProcess || !mPostResourceExtractionTasksCompleted) {
                 prepareToStartMasterProcess(singleProcess, null);
             }
 
@@ -320,6 +325,23 @@ public class MasterStartupControllerImpl implements MasterStartupController {
             LibraryLoader.getInstance().ensureInitialized(mLibraryProcessType);
         } finally {
             StrictMode.setThreadPolicy(oldPolicy);
+        }
+
+        Runnable postResourceExtraction = new Runnable() {
+            @Override
+            public void run() {
+                if (!mPostResourceExtractionTasksCompleted) {
+                    // TODO(yfriedman): Remove dependency on a command line flag for this.
+                    nativeSetCommandLineFlags(singleProcess);
+                    mPostResourceExtractionTasksCompleted = true;
+                }
+
+                if (completionCallback != null) completionCallback.run();
+            }
+        };
+
+        if (completionCallback != null) {
+            postResourceExtraction.run();
         }
     }
 

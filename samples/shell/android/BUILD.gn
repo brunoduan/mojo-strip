@@ -79,6 +79,10 @@ android_library("samples_shell_apk_java") {
 
 
 android_assets("samples_shell_assets") {
+  disable_compression = true
+  deps = [
+    "//third_party/icu:icu_assets",
+  ]
 }                 
                   
 android_apk("samples_shell_apk") {

@@ -618,7 +618,7 @@ public class LibraryLoader {
         // From now on, keep tracing in sync with native.
         TraceEvent.registerNativeEnabledObserver();
 
-        if (processType == LibraryProcessType.PROCESS_BROWSER
+        if (processType == LibraryProcessType.PROCESS_MASTER
                 && PLATFORM_REQUIRES_NATIVE_FALLBACK_EXTRACTION) {
             // Perform the detection and deletion of obsolete native libraries on a background
             // background thread.

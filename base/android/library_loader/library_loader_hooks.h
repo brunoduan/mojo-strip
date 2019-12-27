@@ -18,8 +18,8 @@ namespace android {
 enum LibraryProcessType {
   // The LibraryLoad has not been initialized.
   PROCESS_UNINITIALIZED = 0,
-  // Shared library is running in browser process.
-  PROCESS_BROWSER = 1,
+  // Shared library is running in master process.
+  PROCESS_MASTER = 1,
   // Shared library is running in child process.
   PROCESS_CHILD = 2,
   // Shared library is running in the app that uses webview.

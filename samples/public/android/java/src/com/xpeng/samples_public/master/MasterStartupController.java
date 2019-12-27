@@ -29,8 +29,8 @@ public interface MasterStartupController {
    *
    * @return MasterStartupController instance.
    */
-  public static MasterStartupController get() {
-      return MasterStartupControllerImpl.get();
+  public static MasterStartupController get(int libraryProcessType) {
+      return MasterStartupControllerImpl.get(libraryProcessType);
   }
 
   /**

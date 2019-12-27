@@ -45,13 +45,13 @@ jumbo_static_library("samples_shell_lib") {
 
   public_deps = [
     ":android_shell_descriptors",
-    "//ipc", 
-    "//samples/public/child",
     "//samples/public/app:both",
+    "//samples/public/child",
     "//samples/public/common",
     "//samples/public/master",
+    "//samples/public/slaverer",
     "//samples/public/utility",
-    "//samples/master",
+    "//ipc", 
   ]
 
   deps = [
