@@ -1,0 +1,112 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/buildflag_header.gni")
+import("//build/config/compiler/compiler.gni")
+import("//build/config/jumbo.gni")
+import("//build/config/linux/pangocairo/pangocairo.gni")
+import("//build/config/sanitizers/sanitizers.gni")
+import("//build/config/ui.gni")
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+}
+
+# As part of building Chrome on iOS, it is necessary to run a tool on
+# the host to load datapack and generate output in a format defined
+# by the platform (this is to support notifications).
+#
+# Introduce a standalone target that can build on both 'host' and 'target'
+# toolchains that just builds the support to load datapacks. The dependencies
+# should be kept minimal to not have to build too many targets with multiple
+# toolchains.
+component("ui_data_pack") {
+  sources = [
+    "resource/data_pack.cc",
+    "resource/data_pack.h",
+    "resource/data_pack_export.h",
+    "resource/resource_handle.h",
+    "resource/scale_factor.cc",
+    "resource/scale_factor.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+
+  defines = [ "UI_DATA_PACK_IMPLEMENTATION" ]
+
+  configs += [
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    "//build/config/compiler:no_size_t_to_int_warning",
+    "//build/config/compiler:wexit_time_destructors",
+  ]
+}
+
+jumbo_component("base") {
+  output_name = "ui_base"
+
+  sources = [
+    "l10n/formatter.cc",                                                                                                                                                                                    
+    "l10n/formatter.h",
+    "l10n/l10n_font_util.cc",
+    "l10n/l10n_font_util.h",
+    "l10n/l10n_util.cc",
+    "l10n/l10n_util.h",
+    "l10n/l10n_util_android.cc",
+    "l10n/l10n_util_android.h",
+    "l10n/l10n_util_posix.cc",
+    "l10n/l10n_util_collator.h",
+    "l10n/time_format.cc",
+    "l10n/time_format.h",
+    "layout.cc",
+    "layout.h",
+    "resource/resource_bundle.cc",
+    "resource/resource_bundle.h",
+    "resource/resource_bundle_android.cc",
+    "resource/resource_bundle_android.h",
+    "resource/whitelist.h",
+    "ui_base_export.h",
+    "ui_base_paths.cc",
+    "ui_base_paths.h",
+  ]
+
+  configs += [
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    "//build/config/compiler:no_size_t_to_int_warning",
+    "//build/config/compiler:wexit_time_destructors",
+  ]
+
+  defines = [ "UI_BASE_IMPLEMENTATION" ]
+
+  public_deps = [
+    ":ui_data_pack",
+    "//base",
+  ]
+  deps = [
+    "//base:base_static",
+    "//base:i18n",
+    "//base/third_party/dynamic_annotations",
+    "//ui/strings",
+  ]
+
+  if (is_android) {
+    deps += [ ":ui_base_jni_headers" ]
+    sources -= [
+      "l10n/l10n_font_util.cc",
+    ]
+  }
+
+}
+
+if (is_android) {
+  generate_jni("ui_base_jni_headers") {
+    sources = [
+      "../android/java/src/org/chromium/ui/base/LocalizationUtils.java",
+      "../android/java/src/org/chromium/ui/base/ResourceBundle.java",
+    ]
+    jni_package = "base"
+  }
+}

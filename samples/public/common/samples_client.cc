@@ -97,6 +97,17 @@ bool SamplesClient::UsingSynchronousCompositing() {
 
 #endif  // OS_ANDROID
 
+base::StringPiece SamplesClient::GetDataResource(
+    int resource_id,
+    ui::ScaleFactor scale_factor) const {
+  return base::StringPiece();
+}
+
+base::RefCountedMemory* SamplesClient::GetDataResourceBytes(
+    int resource_id) const {
+  return nullptr;
+}
+
 void SamplesClient::OnServiceManagerConnected(
     ServiceManagerConnection* connection) {}
 

@@ -31,6 +31,7 @@
 #include "samples/master/utility_process_host.h"
 #include "samples/master/utility_process_host_client.h"
 #include "samples/common/service_manager/service_manager_connection_impl.h"
+#include "samples/grit/samples_resources.h"
 #include "samples/public/master/master_thread.h"
 #include "samples/public/master/child_process_data.h"
 #include "samples/public/master/samples_master_client.h"
@@ -138,6 +139,54 @@ void QueryAndStartServiceInUtilityProcess(
                      std::move(request), std::move(pid_receiver)));
 }
 
+// A ManifestProvider which resolves application names to builtin manifest
+// resources for the catalog service to consume.
+class BuiltinManifestProvider : public catalog::ManifestProvider {
+ public:
+  BuiltinManifestProvider() {}
+  ~BuiltinManifestProvider() override {}
+
+  void AddServiceManifest(base::StringPiece name, int resource_id) {
+    std::string contents =
+        GetSamplesClient()
+            ->GetDataResource(resource_id, ui::ScaleFactor::SCALE_FACTOR_NONE)
+            .as_string();
+    DCHECK(!contents.empty());
+
+    std::unique_ptr<base::Value> manifest_value =
+        base::JSONReader::Read(contents);
+    DCHECK(manifest_value);
+
+    std::unique_ptr<base::Value> overlay_value =
+        GetSamplesClient()->master()->GetServiceManifestOverlay(name);
+
+    service_manager::MergeManifestWithOverlay(manifest_value.get(),
+                                              overlay_value.get());
+
+    base::Optional<catalog::RequiredFileMap> required_files =
+        catalog::RetrieveRequiredFiles(*manifest_value);
+    if (required_files) {
+      ChildProcessLauncher::SetRegisteredFilesForService(
+          name.as_string(), std::move(*required_files));
+    }
+
+    auto result = manifests_.insert(
+        std::make_pair(name.as_string(), std::move(manifest_value)));
+    DCHECK(result.second) << "Duplicate manifest entry: " << name;
+  }
+
+ private:
+  // catalog::ManifestProvider:
+  std::unique_ptr<base::Value> GetManifest(const std::string& name) override {
+    auto it = manifests_.find(name);
+    return it != manifests_.end() ? it->second->CreateDeepCopy() : nullptr;
+  }
+
+  std::map<std::string, std::unique_ptr<base::Value>> manifests_;
+
+  DISALLOW_COPY_AND_ASSIGN(BuiltinManifestProvider);
+};
+
 class NullServiceProcessLauncherFactory
     : public service_manager::ServiceProcessLauncherFactory {
  public:
@@ -198,11 +247,13 @@ class ServiceManagerContext::InProcessServiceManagerContext
             service_manager_thread_task_runner) {}
 
   void Start(
-      service_manager::mojom::ServicePtrInfo packaged_services_service_info) {
+      service_manager::mojom::ServicePtrInfo packaged_services_service_info,
+      std::unique_ptr<BuiltinManifestProvider> manifest_provider) {
     service_manager_thread_task_runner_->PostTask(
         FROM_HERE,
         base::BindOnce(
             &InProcessServiceManagerContext::StartOnServiceManagerThread, this,
+            std::move(manifest_provider),
             std::move(packaged_services_service_info),
             base::ThreadTaskRunnerHandle::Get()));
   }
@@ -228,8 +279,10 @@ class ServiceManagerContext::InProcessServiceManagerContext
   ~InProcessServiceManagerContext() {}
 
   void StartOnServiceManagerThread(
+      std::unique_ptr<BuiltinManifestProvider> manifest_provider,
       service_manager::mojom::ServicePtrInfo packaged_services_service_info,
       scoped_refptr<base::SequencedTaskRunner> ui_thread_task_runner) {
+    manifest_provider_ = std::move(manifest_provider);
     std::unique_ptr<service_manager::ServiceProcessLauncherFactory>
         service_process_launcher_factory;
     if (base::CommandLine::ForCurrentProcess()->HasSwitch(
@@ -242,7 +295,7 @@ class ServiceManagerContext::InProcessServiceManagerContext
     }
     service_manager_ = std::make_unique<service_manager::ServiceManager>(
         std::move(service_process_launcher_factory), nullptr,
-        nullptr);
+        manifest_provider_.get());
 
     service_manager::mojom::ServicePtr packaged_services_service;
     packaged_services_service.Bind(std::move(packaged_services_service_info));
@@ -275,6 +328,7 @@ class ServiceManagerContext::InProcessServiceManagerContext
 
   void ShutDownOnServiceManagerThread() {
     service_manager_.reset();
+    manifest_provider_.reset();
   }
 
   void StartServicesOnServiceManagerThread(
@@ -288,6 +342,7 @@ class ServiceManagerContext::InProcessServiceManagerContext
 
   scoped_refptr<base::SingleThreadTaskRunner>
       service_manager_thread_task_runner_;
+  std::unique_ptr<BuiltinManifestProvider> manifest_provider_;
   std::unique_ptr<service_manager::ServiceManager> service_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(InProcessServiceManagerContext);
@@ -309,13 +364,36 @@ ServiceManagerContext::ServiceManagerContext(
     packaged_services_request =
         service_manager::GetServiceRequestFromCommandLine(&invitation);
   } else {
+    std::unique_ptr<BuiltinManifestProvider> manifest_provider =
+        std::make_unique<BuiltinManifestProvider>();
+    static const struct ManifestInfo {
+      const char* name;
+      int resource_id;
+    } kManifests[] = {
+        {mojom::kMasterServiceName, IDR_MOJO_SAMPLES_MASTER_MANIFEST},
+        {mojom::kPackagedServicesServiceName, IDR_MOJO_SAMPLES_PACKAGED_SERVICES_MANIFEST},
+        {mojom::kSlavererServiceName, IDR_MOJO_SAMPLES_SLAVERER_MANIFEST},
+        {mojom::kUtilityServiceName, IDR_MOJO_SAMPLES_UTILITY_MANIFEST},
+        {catalog::mojom::kServiceName, IDR_MOJO_CATALOG_MANIFEST},
+    };
+
+    for (size_t i = 0; i < arraysize(kManifests); ++i) {
+      manifest_provider->AddServiceManifest(kManifests[i].name,
+                                            kManifests[i].resource_id);
+    }
+    for (const auto& manifest :
+         GetSamplesClient()->master()->GetExtraServiceManifests()) {
+      manifest_provider->AddServiceManifest(manifest.name,
+                                            manifest.resource_id);
+    }
 
     in_process_context_ =
         new InProcessServiceManagerContext(service_manager_thread_task_runner_);
 
     service_manager::mojom::ServicePtr packaged_services_service;
     packaged_services_request = mojo::MakeRequest(&packaged_services_service);
-    in_process_context_->Start(packaged_services_service.PassInterface());
+    in_process_context_->Start(packaged_services_service.PassInterface(),
+                               std::move(manifest_provider));
   }
 
   packaged_services_connection_ =

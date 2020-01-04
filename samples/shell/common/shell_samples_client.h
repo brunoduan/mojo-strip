@@ -20,6 +20,11 @@ class ShellSamplesClient : public SamplesClient {
   ShellSamplesClient();
   ~ShellSamplesClient() override;
 
+  base::StringPiece GetDataResource(
+      int resource_id,
+      ui::ScaleFactor scale_factor) const override;
+  base::RefCountedMemory* GetDataResourceBytes(
+      int resource_id) const override;
 };
 
 }  // namespace samples

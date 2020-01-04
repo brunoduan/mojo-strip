@@ -23,6 +23,7 @@
 #include "samples/public/common/service_names.mojom.h"
 #include "samples/public/common/url_constants.h"
 #include "samples/public/test/test_service.h"
+#include "samples/shell/grit/shell_resources.h"
 #include "samples/shell/master/shell_master_context.h"
 #include "samples/shell/master/shell_master_main_parts.h"
 #include "services/test/echo/public/mojom/echo.mojom.h"
@@ -34,6 +35,8 @@
 #include "base/android/path_utils.h"
 #include "samples/shell/android/shell_descriptors.h"
 #endif
+
+#include "ui/base/resource/resource_bundle.h"
 
 namespace samples {
 
@@ -90,7 +93,22 @@ void ShellSamplesMasterClient::AppendExtraCommandLineSwitches(
 
 std::unique_ptr<base::Value>
 ShellSamplesMasterClient::GetServiceManifestOverlay(base::StringPiece name) {
-  return nullptr;
+  int id = -1;
+  if (name == samples::mojom::kMasterServiceName)
+    id = IDR_SAMPLES_SHELL_MASTER_MANIFEST_OVERLAY;
+  else if (name == samples::mojom::kPackagedServicesServiceName)
+    id = IDR_SAMPLES_SHELL_PACKAGED_SERVICES_MANIFEST_OVERLAY;
+  else if (name == samples::mojom::kSlavererServiceName)
+    id = IDR_SAMPLES_SHELL_SLAVERER_MANIFEST_OVERLAY;
+  else if (name == samples::mojom::kUtilityServiceName)
+    id = IDR_SAMPLES_SHELL_UTILITY_MANIFEST_OVERLAY;
+  if (id == -1)
+    return nullptr;
+
+  base::StringPiece manifest_sampless =
+      ui::ResourceBundle::GetSharedInstance().GetRawDataResourceForScale(
+          id, ui::ScaleFactor::SCALE_FACTOR_NONE);
+  return base::JSONReader::Read(manifest_sampless);
 }
 
 void ShellSamplesMasterClient::AdjustUtilityServiceProcessCommandLine(

@@ -1,0 +1,17 @@
+{                                                                                                                                                                                                           
+  "name": "samples_master",
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        "slaverer": [
+          "samples.mojom.MojoLayoutTestHelper"
+        ]
+      },
+      "requires": {
+        "echo": [
+          "echo"
+        ]
+      }
+    }
+  }
+}

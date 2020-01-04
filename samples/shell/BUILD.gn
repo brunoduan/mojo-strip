@@ -1,6 +1,9 @@
-import("//mojo/public/tools/bindings/mojom.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//services/service_manager/public/service_manifest.gni")
+import("//tools/grit/grit_rule.gni")
+import("//tools/grit/repack.gni")
 
 source_set("android_shell_descriptors") {                                                                                                                                                                   
   testonly = true
@@ -55,16 +58,102 @@ jumbo_static_library("samples_shell_lib") {
   ]
 
   deps = [
+    ":resources",
     "//base",
     "//base:base_static",
     "//base/third_party/dynamic_annotations",
     "//services/service_manager/public/cpp",
-    "//services/test/echo:lib",                                                                                                                                                                             
+    "//services/test/echo:lib",
     "//services/test/echo/public/mojom",
     "//mojo/public/java/system:native_support",
     "//samples/public/common",
+    "//samples:resources",
     "//samples/public/common:service_names",
     "//samples/public/test:samples_test_mojo_bindings",
     "//samples/shell/android:samples_shell_jni_headers",
+    "//ui/base",
   ]                    
+}
+
+repack("pak") {
+  testonly = true
+         
+  sources = [
+    "$root_gen_dir/samples/samples_resources.pak",
+    "$root_gen_dir/samples/shell/shell_resources.pak",
+    #"$root_gen_dir/mojo/public/js/mojo_bindings_resources.pak",
+  ]      
+         
+  deps = [
+    ":resources",
+    #"//mojo/public/js:resources",
+    "//samples:resources",
+    "//ui/strings",
+  ]
+  output = "$root_out_dir/samples_shell.pak"
+}
+
+grit("samples_shell_resources_grit") {
+  testonly = true
+ 
+  # External code should depend on ":resources" instead.
+  visibility = [ ":*" ]
+  source = "shell_resources.grd"
+  outputs = [
+    "grit/shell_resources.h",
+    "shell_resources.pak",
+  ]
+ 
+  # Mojo manifest overlays are generated.
+  source_is_generated = true
+  grit_flags = [
+    "-E",
+    "root_gen_dir=" + rebase_path(root_gen_dir, root_build_dir),
+  ]
+  deps = [
+    ":samples_shell_packaged_services_manifest_overlay",
+  ]
+}
+
+copy("copy_shell_resources") {
+  testonly = true
+ 
+  sources = [
+    "$target_gen_dir/shell_resources.pak",
+  ]
+  outputs = [
+    "$root_out_dir/shell_resources.pak",
+  ]
+ 
+  public_deps = [
+    ":samples_shell_resources_grit",
+  ]
+}
+
+group("resources") {
+  testonly = true
+ 
+  public_deps = [
+    ":copy_shell_resources",
+  ]
+}
+
+if (is_android) {
+  group("samples_shell") {
+    testonly = true
+    deps = [
+      "//samples/shell/android:samples_shell_apk",
+    ]
+  }
+}
+
+service_manifest("samples_shell_packaged_services_manifest_overlay") {
+  testonly = true
+ 
+  source = "//samples/shell/master/samples_shell_packaged_services_manifest_overlay.json"
+  packaged_services = [ "//services/test/echo:manifest" ]
+ 
+  if (is_chromeos) {
+    packaged_services += [ "//services/ws/test_ws:manifest" ]
+  }
 }

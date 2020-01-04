@@ -28,6 +28,7 @@ jumbo_source_set("master") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/platform",
     "//mojo/public/cpp/system",
+    "//samples:resources",
     "//samples/common",
     "//samples/common:buildflags",
     "//samples/common:mojo_bindings",
@@ -38,11 +39,15 @@ jumbo_source_set("master") {
     "//services/samples:impl",
     "//services/samples/public/mojom",
     "//samples/public/common:common_sources",
+    "//services/catalog:constants",                                                                                                                                                                         
+    "//services/catalog/public/cpp",
+    "//services/catalog/public/mojom:constants",
     "//services/service_manager/embedder:embedder_result_codes",
     "//services/service_manager/public/cpp",
     "//services/service_manager/public/mojom",
     "//services/service_manager/runner/common",
     "//services/service_manager/runner/host:lib",
+    "//ui/base",
   ]
 
   if (is_android) {

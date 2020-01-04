@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//services/service_manager/public/service_manifest.gni")
+
 source_set("impl") {
   visibility = [
     "//samples/master",
@@ -27,5 +29,9 @@ source_set("impl") {
     "//mojo/public/cpp/bindings",
     "//services/samples/public/mojom",
   ]
+}
 
+service_manifest("manifest") {
+  name = "samples"
+  source = "manifest.json"
 }

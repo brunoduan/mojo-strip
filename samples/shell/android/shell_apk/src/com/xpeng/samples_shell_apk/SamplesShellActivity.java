@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+import com.xpeng.samples.common.ServiceManagerConnectionImpl;
 import com.xpeng.samples.shell.ShellLauncher;
 import com.xpeng.samples_public.master.MasterStartupController;
 
@@ -20,6 +21,14 @@ import org.chromium.base.MemoryPressureListener;
 import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
+import org.chromium.echo.mojom.Echo;
+import org.chromium.echo.mojom.EchoConstants;
+import org.chromium.mojo.bindings.InterfaceRequest;
+import org.chromium.mojo.system.Core;
+import org.chromium.mojo.system.MessagePipeHandle;
+import org.chromium.mojo.system.Pair;
+import org.chromium.mojo.system.impl.CoreImpl;
+import org.chromium.services.service_manager.Connector;
 
 public class SamplesShellActivity extends Activity {
 
@@ -73,6 +82,8 @@ public class SamplesShellActivity extends Activity {
 
     private void finishInitialization(Bundle savedInstanceState) {
         ShellLauncher.getInstance().launchShell();
+
+        connectEchoService();
     }
 
     private void initializationFailed() {
@@ -81,6 +92,31 @@ public class SamplesShellActivity extends Activity {
                 R.string.master_process_initialization_failed,
                 Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private static final String TEST_STRING = "abcdefghijklmnopqrstuvwxyz";
+    private class EchoStringResponseImpl implements Echo.EchoStringResponse {
+        @Override
+        public void call(String str) {
+            assert TEST_STRING.equals(str) == true;
+        }
+    }
+
+    private void connectEchoService() {
+        MessagePipeHandle handle =
+                ServiceManagerConnectionImpl.getConnectorMessagePipeHandle();
+        Core core = CoreImpl.getInstance();
+        Pair<Echo.Proxy, InterfaceRequest<Echo>> pair =
+                Echo.MANAGER.getInterfaceRequest(core);
+
+        // Connect the Echo service via Connector.
+        Connector connector = new Connector(handle);
+        connector.bindInterface(
+                EchoConstants.SERVICE_NAME, Echo.MANAGER.getName(), pair.second);
+
+        // Fire the echoString() mojo call.
+        Echo.EchoStringResponse callback = new EchoStringResponseImpl();
+        pair.first.echoString(TEST_STRING, callback);
     }
 
     @Override

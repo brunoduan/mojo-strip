@@ -28,6 +28,8 @@
 #include "samples/shell/utility/shell_samples_utility_client.h"
 #include "ipc/ipc_buildflags.h"
 #include "services/service_manager/embedder/switches.h"
+#include "ui/base/resource/resource_bundle.h"
+#include "ui/base/ui_base_paths.h"
 
 //#if BUILDFLAG(IPC_MESSAGE_LOG_ENABLED)
 //#define IPC_MESSAGE_MACROS_LOG_ENABLED
@@ -96,6 +98,8 @@ void ShellMainDelegate::PreSandboxStartup() {
   // cpu_brand info.
   base::CPU cpu_info;
 #endif
+
+  InitializeResourceBundle();
 }
 
 int ShellMainDelegate::RunProcess(
@@ -112,6 +116,48 @@ int ShellMainDelegate::RunProcess(
 
   master_runner_.reset(MasterMainRunner::Create());
   return ShellMasterMain(main_function_params, master_runner_);
+}
+
+void ShellMainDelegate::InitializeResourceBundle() {
+#if defined(OS_ANDROID)
+  // On Android, the renderer runs with a different UID and can never access
+  // the file system. Use the file descriptor passed in at launch time.
+  auto* global_descriptors = base::GlobalDescriptors::GetInstance();
+  int pak_fd = global_descriptors->MaybeGet(kShellPakDescriptor);
+  base::MemoryMappedFile::Region pak_region;
+  if (pak_fd >= 0) {
+    pak_region = global_descriptors->GetRegion(kShellPakDescriptor);
+  } else {
+    pak_fd =
+        base::android::OpenApkAsset("assets/samples_shell.pak", &pak_region);
+    // Loaded from disk for browsertests.
+    if (pak_fd < 0) {
+      base::FilePath pak_file;
+      bool r = base::PathService::Get(base::DIR_ANDROID_APP_DATA, &pak_file);
+      DCHECK(r);
+      pak_file = pak_file.Append(FILE_PATH_LITERAL("paks"));
+      pak_file = pak_file.Append(FILE_PATH_LITERAL("samples_shell.pak"));
+      int flags = base::File::FLAG_OPEN | base::File::FLAG_READ;
+      pak_fd = base::File(pak_file, flags).TakePlatformFile();
+      pak_region = base::MemoryMappedFile::Region::kWholeFile;
+    }
+    global_descriptors->Set(kShellPakDescriptor, pak_fd, pak_region);
+  }
+  DCHECK_GE(pak_fd, 0);
+  // This is clearly wrong. See crbug.com/330930
+  ui::ResourceBundle::InitSharedInstanceWithPakFileRegion(base::File(pak_fd),
+                                                          pak_region);
+  ui::ResourceBundle::GetSharedInstance().AddDataPackFromFileRegion(
+      base::File(pak_fd), pak_region, ui::SCALE_FACTOR_100P);
+#elif defined(OS_MACOSX)
+  ui::ResourceBundle::InitSharedInstanceWithPakPath(GetResourcesPakFilePath());
+#else
+  base::FilePath pak_file;
+  bool r = base::PathService::Get(base::DIR_ASSETS, &pak_file);
+  DCHECK(r);
+  pak_file = pak_file.Append(FILE_PATH_LITERAL("samples_shell.pak"));
+  ui::ResourceBundle::InitSharedInstanceWithPakPath(pak_file);
+#endif
 }
 
 void ShellMainDelegate::PreCreateMainMessageLoop() {

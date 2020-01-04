@@ -134,3 +134,30 @@ if (is_component_build) {
     }
   }
 }
+
+service_manifest("packaged_services_manifest") {
+  name = "samples_packaged_services"
+  source = "mojo/samples_packaged_services_manifest.json"
+  packaged_services = [
+    "//services/data_decoder:manifest",
+  ]      
+}
+
+service_manifest("master_manifest") {
+  name = "samples_master"
+  source = "mojo/samples_master_manifest.json"
+  packaged_services = [
+    "//services/samples:manifest",
+    "//services/file:manifest",
+  ]      
+}
+
+service_manifest("slaverer_manifest") {
+  name = "samples_slaverer"
+  source = "mojo/samples_slaverer_manifest.json"
+}
+
+service_manifest("utility_manifest") {
+  name = "samples_utility"
+  source = "mojo/samples_utility_manifest.json"
+}

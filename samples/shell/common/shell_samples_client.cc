@@ -9,11 +9,26 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
 #include "build/build_config.h"
+#include "ui/base/l10n/l10n_util.h"
+#include "ui/base/resource/resource_bundle.h"
 
 namespace samples {
 
 ShellSamplesClient::ShellSamplesClient() {}
 
 ShellSamplesClient::~ShellSamplesClient() {}
+
+base::StringPiece ShellSamplesClient::GetDataResource(
+    int resource_id,
+    ui::ScaleFactor scale_factor) const {
+  return ui::ResourceBundle::GetSharedInstance().GetRawDataResourceForScale(
+      resource_id, scale_factor);
+}
+
+base::RefCountedMemory* ShellSamplesClient::GetDataResourceBytes(
+    int resource_id) const {
+  return ui::ResourceBundle::GetSharedInstance().LoadDataResourceBytes(
+      resource_id);
+}
 
 }  // namespace samples

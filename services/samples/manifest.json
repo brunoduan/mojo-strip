@@ -1,0 +1,17 @@
+{
+  "name": "samples",
+  "display_name": "Samples Service",
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        // The |navigation| capability allows a service to acquire embeddable,
+        // navigable sampless. for now, access to this capability should be
+        // restricted only to services which are at least as trusted as the
+        // Chrome browser process (e.g., Ash).
+        "navigation": [
+          "samples.mojom.NavigableSamplessFactory"
+        ]
+      }
+    }
+  }
+}

@@ -13,6 +13,7 @@
 #include "base/strings/string_piece.h"
 #include "build/build_config.h"
 #include "samples/common/export.h"
+#include "ui/base/layout.h"
 #include "url/gurl.h"
 #include "url/origin.h"
 #include "url/url_util.h"
@@ -128,6 +129,15 @@ class SAMPLES_EXPORT SamplesClient {
   // Returns whether or not V8 script extensions should be allowed for a
   // service worker.
   virtual bool AllowScriptExtensionForServiceWorker(const GURL& script_url);
+
+  // Return the contents of a resource in a StringPiece given the resource id.
+  virtual base::StringPiece GetDataResource(
+      int resource_id,
+      ui::ScaleFactor scale_factor) const;
+
+  // Returns the raw bytes of a scale independent data resource.
+  virtual base::RefCountedMemory* GetDataResourceBytes(
+      int resource_id) const;
 
 #if defined(OS_ANDROID)
   // Returns true for clients like Android WebView that uses synchronous
