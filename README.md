@@ -1,4 +1,4 @@
-# mojo-embedder
+# mojo-strip
 该项目允许在非chromium build环境来编译和使用Mojo。
 
 愿景：非chromium应用能够使用mojo作为多个进程之间的通信机制。
