@@ -1,6 +1,24 @@
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
+action("generate_sandboxed_service_srcjar") {
+  script = "//samples/public/android/generate_child_service.py"
+  depfile = "$target_gen_dir/$target_name.d"
+ 
+  _srcjar_path = "${target_gen_dir}/${target_name}.srcjar"
+  _rebased_srcjar_path = rebase_path(_srcjar_path, root_build_dir)
+ 
+  args = [
+    "--depfile",
+    rebase_path(depfile, root_build_dir),
+    "40",
+    _rebased_srcjar_path,
+  ]
+  outputs = [
+    _srcjar_path,
+  ]
+}
+
 android_library("samples_java") {
   deps = [
     "//base:base_java",
@@ -17,12 +35,17 @@ android_library("samples_java") {
   ]
 
   srcjar_deps = [
+    ":generate_sandboxed_service_srcjar",
     ":samples_public_android_java_enums_srcjar",
   ]
 
   java_files = [
     "java/src/com/xpeng/samples/app/ChromiumLinkerParams.java",
     "java/src/com/xpeng/samples/app/KillChildUncaughtExceptionHandler.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService0.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService1.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService2.java",
     "java/src/com/xpeng/samples/app/SamplesChildProcessService.java",
     "java/src/com/xpeng/samples/app/SamplesChildProcessServiceDelegate.java",
     "java/src/com/xpeng/samples/app/SandboxedProcessService.java",

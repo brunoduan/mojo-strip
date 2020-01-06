@@ -45,8 +45,8 @@ public class SamplesShellActivity extends Activity {
         if (commandLineParams != null) {
           CommandLine.getInstance().appendSwitchesAndArguments(commandLineParams);
         }
-        String [] sp = new String[] {"--single-process"};
-        CommandLine.getInstance().appendSwitchesAndArguments(sp);
+        //String [] sp = new String[] {"--single-process"};
+        //CommandLine.getInstance().appendSwitchesAndArguments(sp);
       }
 
 	    setContentView(R.layout.samples_shell_activity);
