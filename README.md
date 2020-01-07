@@ -30,7 +30,7 @@ autoninja -C out/Debug samples_shell_apk
 - [x] 增加service manifest
 - [x] 单进程中跑通echo service
 - [x] 多进程中跑通echo service
-- [ ] 验证非父子进程是否能够使用mojo进行通信
+- [ ] 进程启动以及绑定service流程改造，允许指定进程名，并使用mojo进行通信
 - [ ] Sandbox支持
 - [ ] 权限管理
 - [ ] 尝试将网络组件独立成service
