@@ -152,4 +152,8 @@ bool SamplesMasterClient::ShouldCreateTaskScheduler() {
   return true;
 }
 
+TracingDelegate* SamplesMasterClient::GetTracingDelegate() {
+  return nullptr;
+}
+
 }  // namespace samples

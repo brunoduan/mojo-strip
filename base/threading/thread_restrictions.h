@@ -42,6 +42,7 @@ class Predictor;
 namespace samples {
 class MasterMainLoop;
 class MasterProcessSubThread;
+class MasterShutdownProfileDumper;
 }
 namespace content {
 class BrowserGpuChannelHostFactory;
@@ -526,6 +527,7 @@ class BASE_EXPORT ThreadRestrictions {
 #if !defined(OFFICIAL_BUILD)
   friend class content::SoftwareOutputDeviceMus;  // Interim non-production code
 #endif
+  friend class samples::MasterShutdownProfileDumper;
 // END USAGE THAT NEEDS TO BE FIXED.
 
 #if DCHECK_IS_ON()

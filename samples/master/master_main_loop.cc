@@ -43,12 +43,17 @@
 #include "base/timer/hi_res_timer_manager.h"
 #include "base/trace_event/trace_event.h"
 #include "build/build_config.h"
+#include "components/tracing/common/trace_startup_config.h"
+#include "components/tracing/common/trace_to_console.h"
+#include "components/tracing/common/tracing_switches.h"
 #include "samples/master/master_thread_impl.h"
 #include "samples/master/child_process_security_policy_impl.h"
 #include "samples/master/service_manager/service_manager_context.h"
 #include "samples/master/slaverer_host/slaver_process_host_impl.h"
 #include "samples/master/startup_data_impl.h"
 #include "samples/master/startup_task_runner.h"
+#include "samples/master/tracing/background_tracing_manager_impl.h"
+#include "samples/master/tracing/tracing_controller_impl.h"
 #include "samples/common/samples_switches_internal.h"
 #include "samples/common/service_manager/service_manager_connection_impl.h"
 #include "samples/common/task_scheduler.h"
@@ -74,6 +79,7 @@
 #include "base/android/jni_android.h"
 #include "samples/master/android/master_startup_controller.h"
 #include "samples/master/android/launcher_thread.h"
+#include "samples/master/android/tracing_controller_android.h"
 #endif
 
 // One of the linux specific headers defines this as a macro.
@@ -126,6 +132,10 @@ void SetFileUrlPathAliasForIpcFuzzer() {
       switches::kFileUrlPathAlias, alias_switch);
 }
 #endif
+
+void OnStoppedStartupTracing(const base::FilePath& trace_file) {
+  VLOG(0) << "Completed startup tracing to " << trace_file.value();
+}
 
 }  // namespace
 
@@ -507,10 +517,81 @@ void MasterMainLoop::InitializeMojo() {
   GetSamplesClient()->OnServiceManagerConnected(
       ServiceManagerConnection::GetForProcess());
 
+  tracing_controller_ = std::make_unique<samples::TracingControllerImpl>();
+  samples::BackgroundTracingManagerImpl::GetInstance()
+      ->AddMetadataGeneratorFunction();
+
+  // Start startup tracing through TracingController's interface. TraceLog has
+  // been enabled in samples_main_runner where threads are not available. Now We
+  // need to start tracing for all other tracing agents, which require threads.
+  auto* trace_startup_config = tracing::TraceStartupConfig::GetInstance();
+  if (trace_startup_config->IsEnabled()) {
+    // This checks kTraceConfigFile switch.
+    TracingController::GetInstance()->StartTracing(
+        trace_startup_config->GetTraceConfig(),
+        TracingController::StartTracingDoneCallback());
+  } else if (parsed_command_line_.HasSwitch(switches::kTraceToConsole)) {
+    TracingController::GetInstance()->StartTracing(
+        tracing::GetConfigForTraceToConsole(),
+        TracingController::StartTracingDoneCallback());
+  }
+  // Start tracing to a file for certain duration if needed. Only do this after
+  // starting the main message loop to avoid calling
+  // MessagePumpForUI::ScheduleWork() before MessagePumpForUI::Start() as it
+  // will crash the browser.
+  if (trace_startup_config->IsTracingStartupForDuration()) {
+    TRACE_EVENT0("startup", "MasterMainLoop::InitStartupTracingForDuration");
+    InitStartupTracingForDuration();
+  }
+
   if (parts_) {
     parts_->ServiceManagerConnectionStarted(
         ServiceManagerConnection::GetForProcess());
   }
+}
+
+base::FilePath MasterMainLoop::GetStartupTraceFileName() const {
+  base::FilePath trace_file;
+
+  trace_file = tracing::TraceStartupConfig::GetInstance()->GetResultFile();
+  if (trace_file.empty()) {
+#if defined(OS_ANDROID)
+    TracingControllerAndroid::GenerateTracingFilePath(&trace_file);
+#else
+    // Default to saving the startup trace into the current dir.
+    trace_file = base::FilePath().AppendASCII("chrometrace.log");
+#endif
+  }
+
+  return trace_file;
+}
+
+void MasterMainLoop::InitStartupTracingForDuration() {
+  DCHECK(tracing::TraceStartupConfig::GetInstance()
+             ->IsTracingStartupForDuration());
+
+  startup_trace_file_ = GetStartupTraceFileName();
+
+  startup_trace_timer_.Start(
+      FROM_HERE,
+      base::TimeDelta::FromSeconds(
+          tracing::TraceStartupConfig::GetInstance()->GetStartupDuration()),
+      this, &MasterMainLoop::EndStartupTracing);
+}
+
+void MasterMainLoop::EndStartupTracing() {
+  // Do nothing if startup tracing is already stopped.
+  if (!tracing::TraceStartupConfig::GetInstance()->IsEnabled())
+    return;
+
+  TracingController::GetInstance()->StopTracing(
+      TracingController::CreateFileEndpoint(
+          startup_trace_file_,
+          base::Bind(OnStoppedStartupTracing, startup_trace_file_)));
+}
+
+void MasterMainLoop::StopStartupTracingTimer() {
+  startup_trace_timer_.Stop();
 }
 
 }  // namespace samples

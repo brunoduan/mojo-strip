@@ -26,9 +26,12 @@
 #include "base/task/post_task.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "build/build_config.h"
+#include "components/tracing/common/trace_startup_config.h"
+#include "components/tracing/common/tracing_switches.h"
 #include "samples/master/bad_message.h"
 #include "samples/master/master_main_loop.h"
 #include "samples/master/service_manager/service_manager_context.h"
+#include "samples/master/tracing/trace_message_filter.h"
 #include "samples/common/child_process_host_impl.h"
 #include "samples/common/service_manager/child_connection.h"
 #include "samples/public/master/master_child_process_host_delegate.h"
@@ -154,6 +157,8 @@ MasterChildProcessHostImpl::MasterChildProcessHostImpl(
 
   child_process_host_.reset(ChildProcessHost::Create(this));
 
+  AddFilter(new TraceMessageFilter(data_.id));
+
   g_child_process_list.Get().push_back(this);
   GetSamplesClient()->master()->MasterChildProcessHostCreated(this);
 
@@ -192,6 +197,29 @@ void MasterChildProcessHostImpl::TerminateAll() {
   }
 }
 
+//static
+void MasterChildProcessHostImpl::CopyTraceStartupFlags(                                                                                                                                                    
+    base::CommandLine* cmd_line) {
+  if (tracing::TraceStartupConfig::GetInstance()->IsEnabled()) {
+    const auto trace_config =
+        tracing::TraceStartupConfig::GetInstance()->GetTraceConfig();
+    if (!trace_config.IsArgumentFilterEnabled()) {
+      // The only trace option that we can pass through switches is the record
+      // mode. Other trace options should have the default value.
+      //
+      // TODO(chiniforooshan): Add other trace options to switches if, for
+      // example, they are used in a telemetry test that needs startup trace
+      // events from renderer processes.
+      cmd_line->AppendSwitchASCII(switches::kTraceStartup,
+                                  trace_config.ToCategoryFilterString());
+      cmd_line->AppendSwitchASCII(
+          switches::kTraceStartupRecordMode,
+          base::trace_event::TraceConfig::TraceRecordModeToStr(
+              trace_config.GetTraceRecordMode()));
+    }
+  }
+}
+
 // static
 void MasterChildProcessHostImpl::CopyFeatureAndFieldTrialFlags(
     base::CommandLine* cmd_line) {
@@ -220,6 +248,7 @@ void MasterChildProcessHostImpl::Launch(
       switches::kEnableLogging,
       switches::kIPCConnectionTimeout,
       switches::kLoggingLevel,
+      switches::kTraceToConsole,
       switches::kV,
       switches::kVModule,
   };

@@ -31,6 +31,9 @@
         "service_manager": [
           "service_manager:service_manager"
         ],
+        "tracing": [
+          "tracing"
+        ],
         "unzip_service": [ "unzip_file" ]
       }
     }

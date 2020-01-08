@@ -140,6 +140,7 @@ service_manifest("packaged_services_manifest") {
   source = "mojo/samples_packaged_services_manifest.json"
   packaged_services = [
     "//services/data_decoder:manifest",
+    "//services/tracing:manifest",
   ]      
 }
 

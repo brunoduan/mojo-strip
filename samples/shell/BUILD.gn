@@ -79,6 +79,7 @@ repack("pak") {
   testonly = true
          
   sources = [
+    "$root_gen_dir/samples/master/tracing/tracing_resources.pak",
     "$root_gen_dir/samples/samples_resources.pak",
     "$root_gen_dir/samples/shell/shell_resources.pak",
     #"$root_gen_dir/mojo/public/js/mojo_bindings_resources.pak",
@@ -88,6 +89,7 @@ repack("pak") {
     ":resources",
     #"//mojo/public/js:resources",
     "//samples:resources",
+    "//samples/master/tracing:resources",
     "//ui/strings",
   ]
   output = "$root_out_dir/samples_shell.pak"

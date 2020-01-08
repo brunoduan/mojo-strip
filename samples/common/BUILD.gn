@@ -56,6 +56,8 @@ source_set("common") {
     ":buildflags",
     "//base",
     "//base/third_party/dynamic_annotations",
+    "//components/tracing",                                                                                                                                                                                 
+    "//components/tracing:startup_tracing",
     "//components/services/filesystem/public/interfaces",
     "//ipc",
     "//mojo/public/cpp/system",

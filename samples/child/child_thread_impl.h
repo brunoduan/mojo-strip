@@ -30,6 +30,7 @@
 #include "ipc/message_router.h"
 #include "mojo/public/cpp/bindings/associated_binding.h"
 #include "mojo/public/cpp/bindings/associated_binding_set.h"
+#include "services/tracing/public/cpp/trace_event_agent.h"
 #include "third_party/blink/public/mojom/associated_interfaces/associated_interfaces.mojom.h"
 
 namespace IPC {
@@ -224,6 +225,8 @@ class SAMPLES_EXPORT ChildThreadImpl
   std::unique_ptr<base::PowerMonitor> power_monitor_;
 
   scoped_refptr<base::SingleThreadTaskRunner> master_process_io_runner_;
+
+  std::unique_ptr<tracing::TraceEventAgent> trace_event_agent_;
 
   std::unique_ptr<variations::ChildProcessFieldTrialSyncer> field_trial_syncer_;
 

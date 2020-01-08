@@ -309,6 +309,7 @@ bool UtilityProcessHost::StartProcess() {
     cmd_line->AppendSwitchASCII(switches::kProcessType,
                                 switches::kUtilityProcess);
     MasterChildProcessHostImpl::CopyFeatureAndFieldTrialFlags(cmd_line.get());
+    MasterChildProcessHostImpl::CopyTraceStartupFlags(cmd_line.get());
     std::string locale = GetSamplesClient()->master()->GetApplicationLocale();
     cmd_line->AppendSwitchASCII(switches::kLang, locale);
 

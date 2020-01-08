@@ -56,6 +56,8 @@
 #include "services/service_manager/runner/host/service_process_launcher.h"
 #include "services/service_manager/sandbox/sandbox_type.h"
 #include "services/service_manager/service_manager.h"
+#include "services/tracing/public/mojom/constants.mojom.h"
+#include "services/tracing/tracing_service.h"
 
 #if defined(OS_ANDROID)
 #include "base/android/jni_android.h"
@@ -412,6 +414,13 @@ ServiceManagerContext::ServiceManagerContext(
                                 service_manager::mojom::kRootUserID),
       std::move(root_master_service), mojo::MakeRequest(&pid_receiver));
   pid_receiver->SetPID(base::GetCurrentProcId());
+
+  {
+    service_manager::EmbeddedServiceInfo info;
+    info.factory = base::Bind(&tracing::TracingService::Create);
+    packaged_services_connection_->AddEmbeddedService(
+        tracing::mojom::kServiceName, info);
+  }
 
   SamplesMasterClient::StaticServiceMap services;
   GetSamplesClient()->master()->RegisterInProcessServices(

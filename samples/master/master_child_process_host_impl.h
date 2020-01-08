@@ -57,6 +57,10 @@ class SAMPLES_EXPORT MasterChildProcessHostImpl
   // from FieldTrials.
   static void CopyFeatureAndFieldTrialFlags(base::CommandLine* cmd_line);
 
+  // Appends kTraceStartup and kTraceRecordMode flags to the command line, if
+  // needed.
+  static void CopyTraceStartupFlags(base::CommandLine* cmd_line);
+
   // MasterChildProcessHost implementation:
   bool Send(IPC::Message* message) override;
   void Launch(std::unique_ptr<SandboxedProcessLauncherDelegate> delegate,

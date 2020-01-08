@@ -33,7 +33,9 @@
 #include "base/threading/thread_local.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "base/timer/elapsed_timer.h"
+#include "base/trace_event/trace_event.h"
 #include "build/build_config.h"
+#include "components/tracing/child/child_trace_message_filter.h"
 #include "samples/child/child_process.h"
 #include "samples/child/thread_safe_sender.h"
 #include "samples/common/field_trial_recorder.mojom.h"
@@ -435,6 +437,8 @@ void ChildThreadImpl::Init(const Options& options) {
   GetServiceManagerConnection()->AddConnectionFilter(
       std::make_unique<SimpleConnectionFilter>(std::move(registry)));
 
+  InitTracing();
+
 #if defined(OS_POSIX)
   // Check that --process-type is specified so we don't do this in unit tests
   // and single-process mode.
@@ -500,6 +504,12 @@ void ChildThreadImpl::InitTracing() {
           *base::CommandLine::ForCurrentProcess());
   if (sandbox_type == service_manager::SANDBOX_TYPE_PROFILING)
     return;
+
+  channel_->AddFilter(new tracing::ChildTraceMessageFilter(
+      ChildProcess::current()->io_task_runner()));
+
+  trace_event_agent_ = tracing::TraceEventAgent::Create(
+      GetConnector(), false /* request_clock_sync_marker_on_android */);
 }
 
 ChildThreadImpl::~ChildThreadImpl() {

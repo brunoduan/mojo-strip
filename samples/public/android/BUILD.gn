@@ -51,6 +51,7 @@ android_library("samples_java") {
     "java/src/com/xpeng/samples/app/SandboxedProcessService.java",
     "java/src/com/xpeng/samples/common/SamplesSwitchUtils.java",
     "java/src/com/xpeng/samples/common/ServiceManagerConnectionImpl.java",
+    "java/src/com/xpeng/samples/common/ui/widget/Toast.java",
     "java/src/com/xpeng/samples/master/BindingManager.java",
     "java/src/com/xpeng/samples/master/ChildProcessCreationParamsImpl.java",
     "java/src/com/xpeng/samples/master/ChildProcessLauncherHelperImpl.java",
@@ -60,6 +61,7 @@ android_library("samples_java") {
     "java/src/com/xpeng/samples/master/SamplesChildProcessConstants.java",
     "java/src/com/xpeng/samples/master/SamplesFeatureList.java",
     "java/src/com/xpeng/samples/master/SpareChildConnection.java",
+    "java/src/com/xpeng/samples/master/TracingControllerAndroid.java",
     "java/src/com/xpeng/samples/shell/ShellHost.java",
     "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
     "java/src/com/xpeng/samples_public/common/SamplesProcessInfo.java",
@@ -79,6 +81,7 @@ generate_jni("samples_jni_headers") {
     "java/src/com/xpeng/samples/master/SamplesFeatureList.java",
     "java/src/com/xpeng/samples/master/ChildProcessLauncherHelperImpl.java",
     "java/src/com/xpeng/samples/master/MasterStartupControllerImpl.java",
+    "java/src/com/xpeng/samples/master/TracingControllerAndroid.java",
     "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
     "java/src/com/xpeng/samples/app/SamplesMain.java",
   ]

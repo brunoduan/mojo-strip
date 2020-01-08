@@ -12,6 +12,7 @@ template("implement_samples_app") {
   samples_app_deps = [
     "//base",
     "//base:i18n",
+    "//components/tracing:startup_tracing",
     "//samples:export",
     "//samples/public/common:common_sources",
     "//samples/public/common:service_names",

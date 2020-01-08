@@ -39,6 +39,7 @@ class LoaderDelegateImpl;
 class ServiceManagerContext;
 class SpeechRecognitionManagerImpl;
 class StartupTaskRunner;
+class TracingControllerImpl;
 struct MainFunctionParams;
 
 // Implements the main master loop stages called from MasterMainRunner.
@@ -84,6 +85,12 @@ class SAMPLES_EXPORT MasterMainLoop {
   // through stopping threads to PostDestroyThreads.
   void ShutdownThreadsAndCleanUp();
 
+  base::FilePath GetStartupTraceFileName() const;
+
+  const base::FilePath& startup_trace_file() const {
+    return startup_trace_file_;
+  }
+
   int GetResultCode() const { return result_code_; }
 
   // Returns the task runner for tasks that that are critical to producing a new
@@ -95,6 +102,8 @@ class SAMPLES_EXPORT MasterMainLoop {
 #if defined(OS_ANDROID)
   void SynchronouslyFlushStartupTasks();
 #endif  // OS_ANDROID
+
+  void StopStartupTracingTimer();
 
   MasterMainParts* parts() { return parts_.get(); }
 
@@ -120,6 +129,8 @@ class SAMPLES_EXPORT MasterMainLoop {
   void MainMessageLoopRun();
 
   void InitializeMojo();
+  void InitStartupTracingForDuration();
+  void EndStartupTracing();
 
   void InitializeAudio();
 
@@ -164,6 +175,12 @@ class SAMPLES_EXPORT MasterMainLoop {
   std::unique_ptr<MasterProcessSubThread> io_thread_;
   std::unique_ptr<base::HighResolutionTimerManager> hi_res_timer_manager_;
 
+  // Members initialized in |InitStartupTracingForDuration()| ------------------
+  base::FilePath startup_trace_file_;
+
+  // This timer initiates trace file saving.
+  base::OneShotTimer startup_trace_timer_;
+
   // Members initialized in |Init()| -------------------------------------------
   // Destroy |parts_| before |main_message_loop_| (required) and before other
   // classes constructed in samples (but after |main_thread_|).
@@ -179,6 +196,8 @@ class SAMPLES_EXPORT MasterMainLoop {
   // Members initialized in |MasterThreadsStarted()| --------------------------
   std::unique_ptr<ServiceManagerContext> service_manager_context_;
   std::unique_ptr<mojo::core::ScopedIPCSupport> mojo_ipc_support_;
+
+  std::unique_ptr<samples::TracingControllerImpl> tracing_controller_;
 
   DISALLOW_COPY_AND_ASSIGN(MasterMainLoop);
 };

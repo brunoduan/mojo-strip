@@ -15,11 +15,20 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/synchronization/atomic_flag.h"
 #include "base/time/time.h"
+#include "base/trace_event/heap_profiler_allocation_context_tracker.h"
+#include "base/trace_event/trace_event.h"
 #include "build/build_config.h"
-#include "samples/master/master_main_loop.h"
+#include "components/tracing/common/trace_startup_config.h"
+#include "components/tracing/common/tracing_switches.h"
 #include "samples/common/samples_switches_internal.h"
+#include "samples/master/master_main_loop.h"
+#include "samples/master/master_shutdown_profile_dumper.h"
 #include "samples/public/common/samples_switches.h"
 #include "samples/public/common/main_function_params.h"
+
+#if defined(OS_ANDROID)
+#include "samples/master/android/tracing_controller_android.h"
+#endif
 
 namespace samples {
 namespace {
@@ -118,7 +127,41 @@ void MasterMainRunnerImpl::Shutdown() {
 
   main_loop_->PreShutdown();
 
+  // If startup tracing has not been finished yet, replace it's dumper
+  // with special version, which would save trace file on exit (i.e.
+  // startup tracing becomes a version of shutdown tracing).
+  // There are two cases:
+  // 1. Startup duration is not reached.
+  // 2. Or if the trace should be saved to file for --trace-config-file flag.
+  std::unique_ptr<MasterShutdownProfileDumper> startup_profiler;
+  if (tracing::TraceStartupConfig::GetInstance()
+          ->IsTracingStartupForDuration()) {
+    main_loop_->StopStartupTracingTimer();
+    if (main_loop_->startup_trace_file() !=
+        base::FilePath().AppendASCII("none")) {
+      startup_profiler.reset(
+          new MasterShutdownProfileDumper(main_loop_->startup_trace_file()));
+    }
+  } else if (tracing::TraceStartupConfig::GetInstance()
+                 ->ShouldTraceToResultFile()) {
+    base::FilePath result_file = main_loop_->GetStartupTraceFileName();
+    startup_profiler.reset(new MasterShutdownProfileDumper(result_file));
+  }
+
+  // The shutdown tracing got enabled in AttemptUserExit earlier, but someone
+  // needs to write the result to disc. For that a dumper needs to get created
+  // which will dump the traces to disc when it gets destroyed.
+  const base::CommandLine& command_line =
+      *base::CommandLine::ForCurrentProcess();
+  std::unique_ptr<MasterShutdownProfileDumper> shutdown_profiler;
+  if (command_line.HasSwitch(switches::kTraceShutdown)) {
+    shutdown_profiler.reset(new MasterShutdownProfileDumper(
+        MasterShutdownProfileDumper::GetShutdownProfileFileName()));
+  }
+
   {
+    // The trace event has to stay between profiler creation and destruction.
+    TRACE_EVENT0("shutdown", "MasterMainRunner");
     g_exited_main_message_loop.Get().Set();
 
     main_loop_->ShutdownThreadsAndCleanUp();

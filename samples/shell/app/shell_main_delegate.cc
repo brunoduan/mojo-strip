@@ -114,6 +114,10 @@ int ShellMainDelegate::RunProcess(
   std::unique_ptr<MasterMainRunner> master_runner_;
 #endif
 
+  base::trace_event::TraceLog::GetInstance()->set_process_name("Master");
+  base::trace_event::TraceLog::GetInstance()->SetProcessSortIndex(
+      kTraceEventMasterProcessSortIndex);
+
   master_runner_.reset(MasterMainRunner::Create());
   return ShellMasterMain(main_function_params, master_runner_);
 }

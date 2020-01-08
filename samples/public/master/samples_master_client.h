@@ -74,6 +74,7 @@ class SlaverProcessHost;
 class SlaverViewHost;
 class ResourceContext;
 class ServiceManagerConnection;
+class TracingDelegate;
 struct MainFunctionParams;
 struct Referrer;
 
@@ -324,6 +325,10 @@ class SAMPLES_EXPORT SamplesMasterClient {
   // Note: the embedder should *not* start the TaskScheduler for
   // MasterMainLoop, MasterMainLoop itself is responsible for that.
   virtual bool ShouldCreateTaskScheduler();
+
+  // Creates a new TracingDelegate. The caller owns the returned value.
+  // It's valid to return nullptr.
+  virtual TracingDelegate* GetTracingDelegate();
 
 };
 
