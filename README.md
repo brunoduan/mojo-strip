@@ -1,7 +1,8 @@
 # mojo-strip
 该项目允许在非chromium build环境来编译和使用Mojo。
 
-愿景：非chromium应用能够使用mojo作为多个进程之间的通信机制。
+THIS PROJECT SHOULD BE USED SOLELY FOR NON-COMMERCIAL, PERSONAL STUDY PURPOSE.
+PLEASE CONTACT ME IF THIS PROJECT VIOLATES ANY COPYRIGHT.
 
 ## 概述
 Mojo是Chromium团队开发的多进程、多线程通信模块，mojo embedder提供了最底层的通信API。
@@ -30,6 +31,7 @@ autoninja -C out/Debug samples_shell_apk
 - [x] 增加service manifest
 - [x] 单进程中跑通echo service
 - [x] 多进程中跑通echo service
+- [x] 多进程使用trace service
 - [ ] 进程启动以及绑定service流程改造，允许指定进程名，并使用mojo进行通信
 - [ ] Sandbox支持
 - [ ] 权限管理
