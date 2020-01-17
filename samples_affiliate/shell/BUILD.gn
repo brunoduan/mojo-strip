@@ -1,0 +1,160 @@
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//services/service_manager/public/service_manifest.gni")
+import("//tools/grit/grit_rule.gni")
+import("//tools/grit/repack.gni")
+
+source_set("android_shell_descriptors") {                                                                                                                                                                   
+  testonly = true
+  sources = [
+    "android/shell_descriptors.h",
+  ]          
+  public_deps = [
+    "//samples_affiliate/public/common:samples_descriptors",
+  ]          
+}
+
+jumbo_static_library("samples_shell_lib") {
+  testonly = true
+  sources = [
+    "android/shell_launcher.h",
+    "android/shell_launcher.cc",
+    "app/shell_main_delegate.cc",
+    "app/shell_main_delegate.h",
+    "common/shell_samples_client.cc",
+    "common/shell_samples_client.h",
+    "master/shell_samples_master_client.cc",
+    "master/shell_samples_master_client.h",
+    "master/shell_master_context.h",
+    "master/shell_master_context.cc",
+    "master/shell_master_main.cc",
+    "master/shell_master_main.h",
+    "master/shell_master_main_parts.cc",
+    "master/shell_master_main_parts.h",
+    "slaverer/shell_samples_slaverer_client.cc",
+    "slaverer/shell_samples_slaverer_client.h",
+    "utility/shell_samples_utility_client.cc",
+    "utility/shell_samples_utility_client.h",
+    "../public/test/test_service.cc",
+    "../public/test/test_service.h",
+  ]                    
+
+  configs += [
+    "//build/config:precompiled_headers",
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]
+
+  public_deps = [
+    ":android_shell_descriptors",
+    "//samples_affiliate/public/app:both",
+    "//samples_affiliate/public/child",
+    "//samples_affiliate/public/common",
+    "//samples_affiliate/public/master",
+    "//samples_affiliate/public/slaverer",
+    "//samples_affiliate/public/utility",
+    "//ipc", 
+  ]
+
+  deps = [
+    ":resources",
+    "//base",
+    "//base:base_static",
+    "//base/third_party/dynamic_annotations",
+    "//services/service_manager/public/cpp",
+    "//services/test/echo:lib",
+    "//services/test/echo/public/mojom",
+    "//mojo/public/java/system:native_support",
+    "//samples_affiliate/public/common",
+    "//samples_affiliate:resources",
+    "//samples_affiliate/public/common:service_names",
+    "//samples_affiliate/public/test:samples_test_mojo_bindings",
+    "//samples_affiliate/shell/android:samples_shell_jni_headers",
+    "//ui/base",
+  ]                    
+}
+
+repack("pak") {
+  testonly = true
+         
+  sources = [
+    "$root_gen_dir/samples_affiliate/master/tracing/tracing_resources.pak",
+    "$root_gen_dir/samples_affiliate/samples_resources.pak",
+    "$root_gen_dir/samples_affiliate/shell/shell_resources.pak",
+    #"$root_gen_dir/mojo/public/js/mojo_bindings_resources.pak",
+  ]      
+         
+  deps = [
+    ":resources",
+    #"//mojo/public/js:resources",
+    "//samples_affiliate:resources",
+    "//samples_affiliate/master/tracing:resources",
+    "//ui/strings",
+  ]
+  output = "$root_out_dir/samples_affiliate/samples_shell.pak"
+}
+
+grit("samples_shell_resources_grit") {
+  testonly = true
+ 
+  # External code should depend on ":resources" instead.
+  visibility = [ ":*" ]
+  source = "shell_resources.grd"
+  outputs = [
+    "grit/shell_resources.h",
+    "shell_resources.pak",
+  ]
+ 
+  # Mojo manifest overlays are generated.
+  source_is_generated = true
+  grit_flags = [
+    "-E",
+    "root_gen_dir=" + rebase_path(root_gen_dir, root_build_dir),
+  ]
+  deps = [
+    ":samples_shell_packaged_services_manifest_overlay",
+  ]
+}
+
+copy("copy_shell_resources") {
+  testonly = true
+ 
+  sources = [
+    "$target_gen_dir/shell_resources.pak",
+  ]
+  outputs = [
+    "$root_out_dir/samples_affiliate/shell_resources.pak",
+  ]
+ 
+  public_deps = [
+    ":samples_shell_resources_grit",
+  ]
+}
+
+group("resources") {
+  testonly = true
+ 
+  public_deps = [
+    ":copy_shell_resources",
+  ]
+}
+
+if (is_android) {
+  group("samples_affiliate_shell") {
+    testonly = true
+    deps = [
+      "//samples_affiliate/shell/android:samples_affiliate_shell_apk",
+    ]
+  }
+}
+
+service_manifest("samples_shell_packaged_services_manifest_overlay") {
+  testonly = true
+ 
+  source = "//samples_affiliate/shell/master/samples_shell_packaged_services_manifest_overlay.json"
+ 
+  if (is_chromeos) {
+    packaged_services += [ "//services/ws/test_ws:manifest" ]
+  }
+}

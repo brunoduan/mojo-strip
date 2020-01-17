@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.xpeng.samples_shell_apk">
 
     <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="23" />
@@ -35,6 +36,15 @@
                 <data android:scheme="https" />
             </intent-filter>
         </activity>
+        <receiver android:name="SamplesBootstrapReceiver"
+                  tools:ignore="ExportedReceiver"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.xpeng.samples_shell_apk.BOOTSTRAP_CHILD_PROCESS">
+                </action>
+            </intent-filter>
+        </receiver>
+
         <!-- The following service entries exist in order to allow us to
              start more than one sandboxed process. -->
 

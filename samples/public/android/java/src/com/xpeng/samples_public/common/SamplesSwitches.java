@@ -52,6 +52,9 @@ public final class SamplesSwitches {
     // Native switch kProcessType
     public static final String SWITCH_PROCESS_TYPE = "type";
 
+    // Native switch kPackageName
+    public static final String SWITCH_PACKAGE_NAME = "pkg-name";
+
     // Native switch kRendererProcess
     public static final String SWITCH_SLAVERER_PROCESS = "slaverer";
 

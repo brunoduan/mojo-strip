@@ -58,6 +58,7 @@
 #include "services/service_manager/service_manager.h"
 #include "services/tracing/public/mojom/constants.mojom.h"
 #include "services/tracing/tracing_service.h"
+#include "services/test/echo_master/echo_master_service.h"
 
 #if defined(OS_ANDROID)
 #include "base/android/jni_android.h"
@@ -103,6 +104,8 @@ void StartServiceInUtilityProcess(
     base::string16 process_name = process_name_callback.Run();
     DCHECK(!process_name.empty());
     impl->SetName(process_name);
+    // TODO: get the package name from manifest
+    impl->SetPackageName("com.xpeng.samples_affiliate_shell_apk");
     impl->SetMetricsName(service_name);
     impl->SetServiceIdentity(service_manager::Identity(service_name));
     impl->SetSandboxType(sandbox_type);
@@ -420,6 +423,13 @@ ServiceManagerContext::ServiceManagerContext(
     info.factory = base::Bind(&tracing::TracingService::Create);
     packaged_services_connection_->AddEmbeddedService(
         tracing::mojom::kServiceName, info);
+  }
+
+  {
+    service_manager::EmbeddedServiceInfo info;
+    info.factory = base::Bind(&echo_master::CreateEchoMasterService);
+    packaged_services_connection_->AddEmbeddedService(
+        echo_master::mojom::kServiceName, info);
   }
 
   SamplesMasterClient::StaticServiceMap services;

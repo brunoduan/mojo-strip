@@ -72,6 +72,7 @@ group("gn_all") {
       #"//tools/android/errorprone_plugin:errorprone_plugin_java",
       #"//tools/android/kerberos/SpnegoAuthenticator:spnego_authenticator_apk",
       "//samples/shell/android:samples_shell_apk",
+      "//samples_affiliate/shell/android:samples_affiliate_shell_apk",
     ]
   }
 }

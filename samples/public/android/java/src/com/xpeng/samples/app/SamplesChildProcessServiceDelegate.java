@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
+import org.chromium.base.BaseSwitches;
 import org.chromium.base.CommandLine;
 import org.chromium.base.JNIUtils;
 import org.chromium.base.Log;
@@ -93,8 +94,10 @@ public class SamplesChildProcessServiceDelegate implements ChildProcessServiceDe
     public boolean loadNativeLibrary(Context hostContext) {
         String processType =
                 CommandLine.getInstance().getSwitchValue(SamplesSwitches.SWITCH_PROCESS_TYPE);
+        String pkgName =
+                CommandLine.getInstance().getSwitchValue(BaseSwitches.AFFILIATE_PACKAGE_NAME);
         // Enable selective JNI registration when the process is not the master process.
-        if (processType != null) {
+        if (processType != null && pkgName == null) {
             JNIUtils.enableSelectiveJniRegistration();
         }
 
@@ -177,6 +180,9 @@ public class SamplesChildProcessServiceDelegate implements ChildProcessServiceDe
     public void runMain() {
         SamplesMain.start(false);
     }
+
+    @Override
+    public void runAffiliateThread() {}
 
     // Return a Linker instance. If testing, the Linker needs special setup.
     private Linker getLinker() {

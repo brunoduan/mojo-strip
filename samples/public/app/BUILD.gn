@@ -141,6 +141,7 @@ service_manifest("packaged_services_manifest") {
   packaged_services = [
     "//services/data_decoder:manifest",
     "//services/tracing:manifest",
+    "//services/test/echo_master:manifest",
   ]      
 }
 

@@ -1,0 +1,60 @@
+import("//tools/grit/grit_rule.gni")
+
+# Applied by targets internal to samples
+config("samples_implementation") {
+  defines = [ "SAMPLES_IMPLEMENTATION" ]
+  configs = [
+    "//build/config/compiler:noshadowing",
+    "//build/config/compiler:wexit_time_destructors",
+  ]
+}
+
+samples_shared_components = [
+  "//samples_affiliate/public/child:child_sources",
+  "//samples_affiliate/public/common:common_sources",
+  "//samples_affiliate/public/master:master_sources",
+  "//samples_affiliate/public/slaverer:slaverer_sources",
+  "//samples_affiliate/public/utility:utility_sources",
+]
+
+if (is_component_build) {
+  component("samples_affiliate") {
+    public_deps =
+        samples_shared_components + ["//samples_affiliate/public/app:both_sources"]
+  }
+} else {
+  group("samples_affiliate") {
+    public_deps = samples_shared_components
+  }
+}
+
+grit("resources") {
+  source = "samples_resources.grd"
+             
+  # The .grd contains references to generated files.
+  source_is_generated = true
+             
+  outputs = [
+    "grit/samples_resources.h",
+    "samples_resources.pak",
+  ]          
+  grit_flags = [
+    "-E",    
+    "root_gen_dir=" + rebase_path(root_gen_dir, root_build_dir),
+  ]          
+  deps = [   
+    "//samples_affiliate/public/app:master_manifest",
+    "//samples_affiliate/public/app:packaged_services_manifest",
+    "//samples_affiliate/public/app:slaverer_manifest",
+    "//samples_affiliate/public/app:utility_manifest",
+    "//services/catalog:manifest",
+  ]          
+}
+
+source_set("export") {
+  # Must only be used inside of samples.
+  visibility = [ "//samples_affiliate/*" ]
+  sources = [
+    "common/export.h",
+  ]
+}

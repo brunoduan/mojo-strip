@@ -27,6 +27,9 @@ public abstract class BaseSwitches {
     // Default country code to be used for search engine localization.
     public static final String DEFAULT_COUNTRY_CODE_AT_INSTALL = "default-country-code";
 
+    // Force launching an affiliate process.
+    public static final String AFFILIATE_PACKAGE_NAME = "pkg-name";
+
     // Prevent instantiation.
     private BaseSwitches() {}
 }

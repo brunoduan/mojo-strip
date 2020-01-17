@@ -56,6 +56,7 @@ android_library("samples_java") {
     "java/src/com/xpeng/samples/master/ChildProcessCreationParamsImpl.java",
     "java/src/com/xpeng/samples/master/ChildProcessLauncherHelperImpl.java",
     "java/src/com/xpeng/samples/master/ChildProcessRanking.java",
+    "java/src/com/xpeng/samples/master/AffiliateProcessHostImpl.java",
     "java/src/com/xpeng/samples/master/LauncherThread.java",
     "java/src/com/xpeng/samples/master/MasterStartupControllerImpl.java",
     "java/src/com/xpeng/samples/master/SamplesChildProcessConstants.java",
@@ -77,6 +78,7 @@ generate_jni("samples_jni_headers") {
   sources = [
     "java/src/com/xpeng/samples/app/SamplesChildProcessServiceDelegate.java",
     "java/src/com/xpeng/samples/common/ServiceManagerConnectionImpl.java",
+    "java/src/com/xpeng/samples/master/AffiliateProcessHostImpl.java",
     "java/src/com/xpeng/samples/master/LauncherThread.java",
     "java/src/com/xpeng/samples/master/SamplesFeatureList.java",
     "java/src/com/xpeng/samples/master/ChildProcessLauncherHelperImpl.java",

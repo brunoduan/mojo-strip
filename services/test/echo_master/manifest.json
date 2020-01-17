@@ -1,0 +1,21 @@
+{
+  "name": "echo_master",
+  "display_name": "Echo Service in Master process",
+  "options" : {
+    "instance_sharing" : "singleton"
+  },
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        "echo_master" : [ "echo_master.mojom.EchoMaster" ],
+        "app" : ["echo_master.mojom.EchoMaster" ],
+        "tests" : [ "*" ]
+      }
+    },
+    "requires": {
+      "service_manager": [
+        "service_manager:service_manager"
+      ]
+    }
+  }
+}

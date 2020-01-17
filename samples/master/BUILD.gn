@@ -40,6 +40,8 @@ jumbo_source_set("master") {
     "//services/file/public/mojom",
     "//services/samples:impl",
     "//services/samples/public/mojom",
+    "//services/test/echo_master:lib",
+    "//services/test/echo_master/public/mojom",
     "//samples/public/common:common_sources",
     "//services/catalog:constants",                                                                                                                                                                         
     "//services/catalog/public/cpp",
@@ -68,6 +70,9 @@ jumbo_source_set("master") {
   sources = [
     "../common/service_manager/child_connection.cc",
     "../common/service_manager/child_connection.h",
+    "android/affiliate_process_host.h",
+    "android/affiliate_process_host_impl.h",
+    "android/affiliate_process_host_impl.cc",
     "android/launcher_thread.cc",
     "android/launcher_thread.h",
     "android/samples_feature_list.cc",

@@ -4,6 +4,7 @@
 
 package org.chromium.base.library_loader;
 
+import static org.chromium.base.BaseSwitches.AFFILIATE_PACKAGE_NAME;
 import static org.chromium.base.metrics.CachedMetrics.EnumeratedHistogramSample;
 
 import android.annotation.SuppressLint;
@@ -592,7 +593,12 @@ public class LibraryLoader {
     private void initializeAlreadyLocked(@LibraryProcessType int processType)
             throws ProcessInitException {
         if (mInitialized) {
-            if (mLibraryProcessType != processType) {
+            boolean isAffiliateProcess = false;
+            if (CommandLine.isInitialized()) {
+                isAffiliateProcess = CommandLine.getInstance().hasSwitch(AFFILIATE_PACKAGE_NAME);
+            }
+
+            if (mLibraryProcessType != processType && !isAffiliateProcess) {
                 throw new ProcessInitException(
                         LoaderErrors.LOADER_ERROR_NATIVE_LIBRARY_LOAD_FAILED);
             }

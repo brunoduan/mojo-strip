@@ -46,6 +46,7 @@
 #include "components/tracing/common/trace_startup_config.h"
 #include "components/tracing/common/trace_to_console.h"
 #include "components/tracing/common/tracing_switches.h"
+#include "samples/master/android/affiliate_process_host.h"
 #include "samples/master/master_thread_impl.h"
 #include "samples/master/child_process_security_policy_impl.h"
 #include "samples/master/service_manager/service_manager_context.h"
@@ -548,6 +549,9 @@ void MasterMainLoop::InitializeMojo() {
     parts_->ServiceManagerConnectionStarted(
         ServiceManagerConnection::GetForProcess());
   }
+
+  AffiliateProcessHost::SetForProcess(
+      AffiliateProcessHost::Create(io_thread_->task_runner()));
 }
 
 base::FilePath MasterMainLoop::GetStartupTraceFileName() const {

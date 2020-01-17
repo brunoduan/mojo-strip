@@ -46,6 +46,7 @@ source_set("blink_headers") {
 mojom("mojo_bindings") {
   visibility = [
     "//samples/*",
+    "//samples_affiliate/*",
   ]
   visibility_blink =
       [ "//third_party/blink/renderer/platform:blink_platform_public_deps" ]

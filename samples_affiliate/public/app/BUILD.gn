@@ -1,0 +1,164 @@
+import("//services/service_manager/public/service_manifest.gni")
+
+public_app_shared_sources = [
+  "samples_jni_onload.h",
+  "samples_main.h",
+  "samples_main_delegate.cc",
+  "samples_main_delegate.h",
+  "samples_main_runner.h",
+]
+
+public_app_shared_deps = [
+  "//base",
+  "//base:i18n",
+  "//samples_affiliate:export",
+  "//samples_affiliate/public/common:common_sources",
+  "//services/service_manager/background:lib",
+  "//services/service_manager/embedder",
+  "//services/service_manager/public/cpp",
+]
+
+if (is_component_build) {
+  source_set("both_sources") {
+    # Only the main samples shared library can pull this in.
+    visibility = [ "//samples_affiliate:samples_affiliate" ]
+
+    sources = public_app_shared_sources
+
+    configs += [ "//samples_affiliate:samples_implementation" ]
+
+    deps = public_app_shared_deps + [
+             "//samples_affiliate/app:both",
+             "//samples_affiliate/public/master:master_sources",
+             "//samples_affiliate/public/slaverer:slaverer_sources",
+             "//samples_affiliate/public/utility:utility_sources",
+           ]
+
+    allow_circular_includes_from = [
+      # This target is a pair with the non-public version. They always go
+      # together and include headers from each other.
+      "//samples_affiliate/app:both",
+    ]
+  }
+
+  # These all just forward to samples, which in turn depends on "both_sources".
+  group("master") {
+    public_deps = [
+      "//samples_affiliate",
+    ]
+  }
+  group("slave") {
+    public_deps = [
+      "//samples_affiliate",
+    ]
+  }
+  group("both") {
+    public_deps = [
+      "//samples_affiliate",
+    ]
+  }
+} else {
+  source_set("both") {
+    check_includes = false  # See comment above.
+
+    sources = public_app_shared_sources
+    configs += [ "//samples_affiliate:samples_implementation" ]
+    deps = public_app_shared_deps + [
+             "//samples_affiliate/app:both",
+             "//samples_affiliate/public/common",
+             "//samples_affiliate/public/master",
+             "//samples_affiliate/public/slaverer:slaverer_sources",
+             "//samples_affiliate/public/utility:utility_sources",
+           ]
+
+    allow_circular_includes_from = [
+      # This target is a pair with the non-public version. They always go
+      # together and include headers from each other.
+      "//samples_affiliate/app:both",
+    ]
+  }
+
+  if (is_multi_dll_chrome) {
+    source_set("master") {
+      check_includes = false  # See comment above.
+
+      sources = public_app_shared_sources
+
+      defines = [ "CHROME_MULTIPLE_DLL_BROWSER" ]
+      configs += [ "//samples_affiliate:samples_implementation" ]
+
+      deps = public_app_shared_deps + [
+               "//samples_affiliate/app:master",
+               "//samples_affiliate/public/common",
+               "//samples_affiliate/public/master",
+             ]
+
+      allow_circular_includes_from = [
+        # This target is a pair with the non-public version. They always go
+        # together and include headers from each other.
+        "//samples_affiliate/app:master",
+      ]
+    }
+
+    source_set("slave") {
+      check_includes = false  # See comment above.
+
+      sources = public_app_shared_sources
+
+      defines = [ "CHROME_MULTIPLE_DLL_CHILD" ]
+      configs += [ "//samples_affiliate:samples_implementation" ]
+
+      deps = public_app_shared_deps + [
+               "//samples_affiliate/app:slave",
+               "//samples_affiliate/public/common",
+             ]
+
+      allow_circular_includes_from = [
+        # This target is a pair with the non-public version. They always go
+        # together and include headers from each other.
+        "//samples_affiliate/app:slave",
+      ]
+    }
+  } else {
+    # When the multi-DLL build is disabled, there is only one type of the
+    # "app" target, and "master" and "slave" are the same as "both".
+    group("master") {
+      deps = [
+        ":both",
+      ]
+    }
+    group("slave") {
+      deps = [
+        ":both",
+      ]
+    }
+  }
+}
+
+service_manifest("packaged_services_manifest") {
+  name = "samples_packaged_services"
+  source = "mojo/samples_packaged_services_manifest.json"
+  packaged_services = [
+    "//services/data_decoder:manifest",
+    "//services/tracing:manifest",
+  ]      
+}
+
+service_manifest("master_manifest") {
+  name = "samples_master"
+  source = "mojo/samples_master_manifest.json"
+  packaged_services = [
+    "//services/samples:manifest",
+    "//services/file:manifest",
+  ]      
+}
+
+service_manifest("slaverer_manifest") {
+  name = "samples_slaverer"
+  source = "mojo/samples_slaverer_manifest.json"
+}
+
+service_manifest("utility_manifest") {
+  name = "samples_utility"
+  source = "mojo/samples_utility_manifest.json"
+}

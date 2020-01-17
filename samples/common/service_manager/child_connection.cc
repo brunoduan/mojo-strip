@@ -111,7 +111,6 @@ class ChildConnection::IOThreadContext
 
   DISALLOW_COPY_AND_ASSIGN(IOThreadContext);
 };
-
 ChildConnection::ChildConnection(
     const service_manager::Identity& child_identity,
     mojo::OutgoingInvitation* invitation,

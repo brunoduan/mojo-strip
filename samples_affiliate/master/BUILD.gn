@@ -1,0 +1,155 @@
+import("//build/buildflag_header.gni")
+import("//build/config/features.gni")
+import("//build/config/jumbo.gni")
+
+
+jumbo_source_set("master") {
+  visibility = [
+    "//samples_affiliate/app:*",
+    "//samples_affiliate/shell:samples_shell_lib",
+    "//samples_affiliate/public/master:master_sources",
+  ]
+
+  configs += [
+    "//build/config:precompiled_headers",
+    "//samples_affiliate:samples_implementation",
+  ]
+
+  defines = []
+  libs = []
+  ldflags = []
+
+  deps = [
+    "//base",
+    "//base:base_static",
+    "//base/third_party/dynamic_annotations",
+    "//components/tracing",
+    "//components/tracing:startup_tracing",
+    "//components/variations",
+    "//mojo/core/embedder",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/platform",
+    "//mojo/public/cpp/system",
+    "//samples_affiliate:resources",
+    "//samples_affiliate/common",
+    "//samples_affiliate/common:buildflags",
+    "//samples_affiliate/common:mojo_bindings",
+    "//services/data_decoder/public/cpp",
+    "//services/data_decoder/public/mojom",
+    "//services/file:lib",
+    "//services/file/public/mojom",
+    "//services/samples:impl",
+    "//services/samples/public/mojom",
+    "//samples_affiliate/public/common:common_sources",
+    "//services/catalog:constants",                                                                                                                                                                         
+    "//services/catalog/public/cpp",
+    "//services/catalog/public/mojom:constants",
+    "//services/service_manager/embedder:embedder_result_codes",
+    "//services/service_manager/public/cpp",
+    "//services/service_manager/public/mojom",
+    "//services/service_manager/runner/common",
+    "//services/service_manager/runner/host:lib",
+    "//services/tracing:lib",
+    "//services/tracing/public/cpp",
+    "//third_party/zlib",
+    "//ui/base",
+  ]
+
+  if (is_android) {
+    deps += [
+      "//samples_affiliate/public/android:samples_jni_headers",
+    ]
+  }
+
+  public_deps = [
+    "//ipc",
+  ]
+
+  sources = [
+    "../common/service_manager/child_connection.cc",
+    "../common/service_manager/child_connection.h",
+    "android/launcher_thread.cc",
+    "android/launcher_thread.h",
+    "android/samples_feature_list.cc",
+    "android/samples_feature_list.h",
+    "android/master_startup_controller.cc",
+    "android/master_startup_controller.h",
+    "android/samples_startup_flags.cc",
+    "android/samples_startup_flags.h",
+    "android/tracing_controller_android.cc",
+    "android/tracing_controller_android.h",
+    "bad_message.cc",
+    "bad_message.h",
+    "child_process_launcher.cc",
+    "child_process_launcher.h",
+    "child_process_launcher_helper.cc",
+    "child_process_launcher_helper.h",
+    "child_process_launcher_helper_android.cc",
+    "child_process_security_policy_impl.cc",
+    "child_process_security_policy_impl.h",
+    "isolated_origin_util.cc",
+    "isolated_origin_util.h",
+    "master_context.cc",
+    "master_main.cc",
+    "master_main.h",
+    "master_main_loop.cc",
+    "master_main_loop.h",
+    "master_main_runner_impl.cc",
+    "master_main_runner_impl.h",
+    "master_child_process_host_impl.cc",
+    "master_child_process_host_impl.h",
+    "master_process_sub_thread.cc",
+    "master_process_sub_thread.h",
+    "master_shutdown_profile_dumper.cc",
+    "master_shutdown_profile_dumper.h",
+    "master_thread_impl.cc",
+    "master_thread_impl.h",
+    "notification_service_impl.cc",
+    "notification_service_impl.h",
+    "samples_service_delegate_impl.cc",
+    "samples_service_delegate_impl.h",
+    "scheduler/master_task_executor.cc",
+    "scheduler/master_task_executor.h",
+    "service_manager/common_master_interfaces.cc",
+    "service_manager/common_master_interfaces.h",
+    "service_manager/service_manager_context.cc",
+    "service_manager/service_manager_context.h",
+    "slaverer_host/slaver_process_host_impl.cc",
+    "slaverer_host/slaver_process_host_impl.h",
+    "startup_data_impl.cc",
+    "startup_data_impl.h",
+    "startup_helper.cc",
+    "startup_helper.h",
+    "startup_task_runner.cc",
+    "startup_task_runner.h",
+    "tracing/background_startup_tracing_observer.cc",
+    "tracing/background_startup_tracing_observer.h",
+    "tracing/background_tracing_config_impl.cc",
+    "tracing/background_tracing_config_impl.h",
+    "tracing/background_tracing_manager_impl.cc",
+    "tracing/background_tracing_manager_impl.h",
+    "tracing/background_tracing_rule.cc",
+    "tracing/background_tracing_rule.h",
+    "tracing/etw_tracing_agent_win.cc",
+    "tracing/etw_tracing_agent_win.h",
+    "tracing/file_tracing_provider_impl.cc",
+    "tracing/file_tracing_provider_impl.h",
+    "tracing/trace_message_filter.cc",
+    "tracing/trace_message_filter.h",
+    "tracing/tracing_controller_impl.cc",
+    "tracing/tracing_controller_impl.h",
+    "tracing/tracing_controller_impl_data_endpoint.cc",
+    "utility_process_host.cc",
+    "utility_process_host.h",
+    "utility_process_host_client.h",
+  ]
+
+  if (is_posix) {
+    sources += [
+      "child_process_launcher_helper_posix.cc",
+      "child_process_launcher_helper_posix.h",
+      "posix_file_descriptor_info_impl.cc",
+      "posix_file_descriptor_info_impl.h",
+    ]
+  }
+}

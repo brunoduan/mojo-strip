@@ -1,0 +1,12 @@
+{
+  "name": "samples_slaverer",
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        "master": [
+          "samples.mojom.TestService"
+        ]
+      }
+    }
+  }
+}

@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;
 import org.chromium.base.VisibleForTesting;
 
@@ -45,6 +46,9 @@ public class ChildConnectionAllocator {
         }
     }
 
+    private static final String AFFILIATE_SERVICE_NAME =
+            "com.xpeng.samples.app.AffiliateSandboxedProcessService";
+
     // Delay between the call to freeConnection and the connection actually beeing   freed.
     private static final long FREE_CONNECTION_DELAY_MILLIS = 1;
 
@@ -59,6 +63,7 @@ public class ChildConnectionAllocator {
     private final Runnable mFreeSlotCallback;
     private final String mPackageName;
     private final String mServiceClassName;
+    private final boolean mIsAffiliatePackage;
     private final boolean mBindToCaller;
     private final boolean mBindAsExternalService;
     private final boolean mUseStrongBinding;
@@ -94,6 +99,19 @@ public class ChildConnectionAllocator {
             throw new RuntimeException("Illegal meta data value for number of child services");
         }
 
+        if (!ContextUtils.getApplicationContext().getPackageName().equals(packageName)) {
+            return new ChildConnectionAllocator(
+                    launcherHandler,
+                    freeSlotCallback,
+                    packageName,
+                    AFFILIATE_SERVICE_NAME,
+                    bindToCaller,
+                    bindAsExternalService,
+                    useStrongBinding,
+                    numServices,
+                    true);
+        }
+
         // Check that the service exists.
         try {
             // PackageManager#getServiceInfo() throws an exception if the service does not exist.
@@ -105,7 +123,7 @@ public class ChildConnectionAllocator {
 
         return new ChildConnectionAllocator(launcherHandler, freeSlotCallback, packageName,
                 serviceClassName, bindToCaller, bindAsExternalService, useStrongBinding,
-                numServices);
+                numServices, false);
     }
 
     /**
@@ -118,17 +136,19 @@ public class ChildConnectionAllocator {
             boolean bindAsExternalService, boolean useStrongBinding) {
         return new ChildConnectionAllocator(new Handler(), freeSlotCallback, packageName,
                 serviceClassName, bindToCaller, bindAsExternalService, useStrongBinding,
-                serviceCount);
+                serviceCount, false);
     }
 
     private ChildConnectionAllocator(Handler launcherHandler, Runnable freeSlotCallback,
             String packageName, String serviceClassName, boolean bindToCaller,
-            boolean bindAsExternalService, boolean useStrongBinding, int numChildServices) {
+            boolean bindAsExternalService, boolean useStrongBinding,
+                                     int numChildServices, boolean affiliatePackage) {
         mFreeSlotCallback = freeSlotCallback;
         mLauncherHandler = launcherHandler;
         assert isRunningOnLauncherThread();
         mPackageName = packageName;
         mServiceClassName = serviceClassName;
+        mIsAffiliatePackage = affiliatePackage;
         mBindToCaller = bindToCaller;
         mBindAsExternalService = bindAsExternalService;
         mUseStrongBinding = useStrongBinding;
@@ -147,9 +167,13 @@ public class ChildConnectionAllocator {
             Log.d(TAG, "Ran out of services to allocate.");
             return null;
         }
-        int slot = mFreeConnectionIndices.remove(0);
-        assert mChildProcessConnections[slot] == null;
-        ComponentName serviceName = new ComponentName(mPackageName, mServiceClassName + slot);
+        int slot = mFreeConnectionIndices.get(0);
+        if (!mIsAffiliatePackage) {
+            slot = mFreeConnectionIndices.remove(0);
+            assert mChildProcessConnections[slot] == null;
+        }
+        String serviceClassName = mIsAffiliatePackage ? AFFILIATE_SERVICE_NAME : mServiceClassName + slot;
+        ComponentName serviceName = new ComponentName(mPackageName, serviceClassName);
 
         // Wrap the service callbacks so that:
         // - we can intercept onChildProcessDied and clean-up connections
@@ -217,17 +241,24 @@ public class ChildConnectionAllocator {
 
         ChildProcessConnection connection = mConnectionFactory.createConnection(
                 context, serviceName, mBindToCaller, mBindAsExternalService, serviceBundle);
-        mChildProcessConnections[slot] = connection;
+        if (!mIsAffiliatePackage) {
+            mChildProcessConnections[slot] = connection;
+        }
 
         connection.start(mUseStrongBinding, serviceCallbackWrapper);
-        Log.d(TAG, "Allocator allocated and bound a connection, name: %s, slot: %d",
-                mServiceClassName, slot);
+        if (!mIsAffiliatePackage) {
+            Log.d(TAG, "Allocator allocated and bound a connection, name: %s, slot: %d",
+                    mServiceClassName, slot);
+        }
         return connection;
     }
 
     /** Frees a connection and notifies listeners. */
     private void free(ChildProcessConnection connection) {
         assert isRunningOnLauncherThread();
+        if (mIsAffiliatePackage) {
+            return;
+        }
 
         // mChildProcessConnections is relatively short (20 items at max at this point).
         // We are better of iterating than caching in a map.

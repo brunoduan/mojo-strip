@@ -1,0 +1,25 @@
+{
+  "name": "samples_utility",
+  "display_name": "Samples (utility process)",
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        "master": [
+          "samples.mojom.Child",
+          "samples.mojom.ChildControl",
+          "IPC.mojom.ChannelBootstrap",
+          "service_manager.mojom.ServiceFactory"
+        ],
+        "service_manager:service_factory": [
+          "service_manager.mojom.ServiceFactory"
+        ]
+      },
+      "requires": {
+        "*": [ "app" ],
+        "samples_master": [
+          "field_trials"
+        ]
+      }
+    }
+  }
+}

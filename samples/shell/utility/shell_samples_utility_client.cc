@@ -21,7 +21,6 @@
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/cpp/system/buffer.h"
 #include "services/service_manager/public/cpp/binder_registry.h"
-#include "services/test/echo/echo_service.h"
 
 namespace samples {
 
@@ -109,13 +108,6 @@ void ShellSamplesUtilityClient::RegisterServices(StaticServiceMap* services) {
     info.factory = base::BindRepeating(&CreateTestService);
     services->insert(std::make_pair(kTestServiceUrl, info));
   }
-
-  {
-    service_manager::EmbeddedServiceInfo info;
-    info.factory = base::BindRepeating(&echo::CreateEchoService);
-    services->insert(std::make_pair(echo::mojom::kServiceName, info));
-  }
-
 }
 
 }  // namespace samples

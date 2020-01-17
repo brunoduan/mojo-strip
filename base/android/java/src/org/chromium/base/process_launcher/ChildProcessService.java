@@ -4,7 +4,9 @@
 
 package org.chromium.base.process_launcher;
 
+import android.app.ActivityManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.support.annotation.IntDef;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import org.chromium.base.BaseSwitches;
@@ -76,6 +79,8 @@ public abstract class ChildProcessService extends Service {
 
     // Parameters received via IPC, only accessed while holding the mMainThread monitor.
     private String[] mCommandLineParams;
+
+    private boolean mIsAffilicatePackageRunning;
 
     // File descriptors that should be registered natively.
     private FileDescriptorInfo[] mFdInfos;
@@ -214,7 +219,15 @@ public abstract class ChildProcessService extends Service {
                         }
                     }
                     assert mServiceBound;
-                    CommandLine.init(mCommandLineParams);
+
+                    if (mIsAffilicatePackageRunning) {
+                        if (CommandLine.isInitialized()) {
+                            CommandLine.getInstance().appendSwitchesAndArguments(mCommandLineParams);
+                        }
+                    } else {
+                        CommandLine.init(mCommandLineParams);
+                    }
+
 
                     if (CommandLine.getInstance().hasSwitch(
                                 BaseSwitches.RENDERER_WAIT_FOR_JAVA_DEBUGGER)) {
@@ -348,6 +361,9 @@ public abstract class ChildProcessService extends Service {
             }
             // We must have received the command line by now
             assert mCommandLineParams != null;
+
+            mIsAffilicatePackageRunning = checkAffiliateProcessRunning();
+
             Parcelable[] fdInfosAsParcelable =
                     bundle.getParcelableArray(ChildProcessConstants.EXTRA_FILES);
             if (fdInfosAsParcelable != null) {
@@ -359,6 +375,35 @@ public abstract class ChildProcessService extends Service {
             mDelegate.onConnectionSetup(bundle, clientInterfaces);
             mMainThread.notifyAll();
         }
+    }
+
+    private boolean checkAffiliateProcessRunning() {
+        String pkgNamePrefix = "--pkg-name=";
+
+        for (String command : mCommandLineParams) {
+            if (!TextUtils.isEmpty(command) && command.startsWith(pkgNamePrefix)) {
+                String name = command.substring(pkgNamePrefix.length());
+                return isPackageProcessAvailable(name);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isPackageProcessAvailable(String packageName) {
+        ActivityManager am = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> procs;
+        if (am != null) {
+            procs = am.getRunningAppProcesses();
+            for (ActivityManager.RunningAppProcessInfo proc : procs) {
+                if (!TextUtils.isEmpty(proc.processName) &&
+                        proc.processName.equals(packageName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -1,0 +1,21 @@
+module samples.mojom;
+
+// The default service name the master identifies as when connecting to
+// the Service Manager. This must match the name in
+// src/samples/public/app/mojo/samples_master_manifest.json.
+const string kMasterServiceName = "samples_master";
+
+// The service name used to identify the master process's singleton service
+// instance which packages other master-wide services. this must match the name
+// in src/samples/public/app/mojo/samples_packaged_services_manifest.json.
+const string kPackagedServicesServiceName = "samples_packaged_services";
+
+// The default service name used to identify render processes when connecting
+// them to the Service Manager. This must match the name in
+// src/samples/public/app/mojo/samples_slaverer_manifest.json.
+const string kSlavererServiceName = "samples_slaverer";
+
+// The default service name used to identify utility processes when connecting
+// them to the Service Manager. This must match the name in
+// src/samples/public/app/mojo/samples_utility_manifest.json.
+const string kUtilityServiceName = "samples_utility";

@@ -84,6 +84,7 @@ android_library("samples_shell_apk_java") {
   android_manifest_for_lint = samples_shell_manifest
  
   java_files = [ 
+    "shell_apk/src/com/xpeng/samples_shell_apk/SamplesBootstrapReceiver.java",
     "shell_apk/src/com/xpeng/samples_shell_apk/SamplesShellActivity.java",
     "shell_apk/src/com/xpeng/samples_shell_apk/SamplesShellApplication.java",
     "java/src/com/xpeng/samples/shell/ShellLauncher.java",

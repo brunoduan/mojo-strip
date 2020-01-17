@@ -1,0 +1,43 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/jumbo.gni")
+
+# See //samples_affiliate/BUILD.gn for how this works.
+group("child") {
+  if (is_component_build) {
+    public_deps = [
+      "//samples_affiliate",
+    ]
+  } else {
+    public_deps = [
+      ":child_sources",
+    ]
+  }
+}
+
+jumbo_source_set("child_sources") {
+  # External code should depend in via ":child" above.
+  visibility = [ "//samples_affiliate/*" ]
+
+  sources = [
+    "child_thread.h",
+  ]
+
+  configs += [
+    "//build/config/compiler:wexit_time_destructors",
+    "//samples_affiliate:samples_implementation",
+  ]
+
+  deps = [
+    "//samples_affiliate/child",  # Must not be public_deps!
+    "//samples_affiliate/public/common:common_sources",
+  ]
+
+  allow_circular_includes_from = [
+    # This target is a pair with samples/child. They always go together and
+    # include headers from each other.
+    "//samples_affiliate/child",
+  ]
+}

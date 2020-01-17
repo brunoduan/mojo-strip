@@ -1,0 +1,95 @@
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+
+action("generate_sandboxed_service_srcjar") {
+  script = "//samples_affiliate/public/android/generate_child_service.py"
+  depfile = "$target_gen_dir/$target_name.d"
+ 
+  _srcjar_path = "${target_gen_dir}/${target_name}.srcjar"
+  _rebased_srcjar_path = rebase_path(_srcjar_path, root_build_dir)
+ 
+  args = [
+    "--depfile",
+    rebase_path(depfile, root_build_dir),
+    "40",
+    _rebased_srcjar_path,
+  ]
+  outputs = [
+    _srcjar_path,
+  ]
+}
+
+android_library("samples_java") {
+  deps = [
+    "//base:base_java",
+    "//mojo/public/java:base_java",
+    "//mojo/public/java:bindings_java",
+    "//mojo/public/java:system_java",
+    "//mojo/public/java/system:system_impl_java",
+    "//services/service_manager/public/java:service_manager_java",
+    "//services/service_manager/public/mojom:mojom_java",
+    "//services/test/echo_master/public/mojom:mojom_java",
+    "//third_party/android_deps:android_support_annotations_java",
+    "//third_party/jsr-305:jsr_305_javalib",
+  ]
+
+  srcjar_deps = [
+    ":generate_sandboxed_service_srcjar",
+    ":samples_public_android_java_enums_srcjar",
+  ]
+
+  java_files = [
+    "java/src/com/xpeng/samples/app/AffiliateSandboxedProcessService.java",
+    "java/src/com/xpeng/samples/app/ChromiumLinkerParams.java",
+    "java/src/com/xpeng/samples/app/KillChildUncaughtExceptionHandler.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService0.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService1.java",
+    "java/src/com/xpeng/samples/app/PrivilegedProcessService2.java",
+    "java/src/com/xpeng/samples/app/SamplesChildProcessService.java",
+    "java/src/com/xpeng/samples/app/SamplesChildProcessServiceDelegate.java",
+    "java/src/com/xpeng/samples/app/SandboxedProcessService.java",
+    "java/src/com/xpeng/samples/common/SamplesSwitchUtils.java",
+    "java/src/com/xpeng/samples/common/ServiceManagerConnectionImpl.java",
+    "java/src/com/xpeng/samples/common/ui/widget/Toast.java",
+    "java/src/com/xpeng/samples/master/BindingManager.java",
+    "java/src/com/xpeng/samples/master/ChildProcessCreationParamsImpl.java",
+    "java/src/com/xpeng/samples/master/ChildProcessLauncherHelperImpl.java",
+    "java/src/com/xpeng/samples/master/ChildProcessRanking.java",
+    "java/src/com/xpeng/samples/master/LauncherThread.java",
+    "java/src/com/xpeng/samples/master/MasterStartupControllerImpl.java",
+    "java/src/com/xpeng/samples/master/SamplesChildProcessConstants.java",
+    "java/src/com/xpeng/samples/master/SamplesFeatureList.java",
+    "java/src/com/xpeng/samples/master/SpareChildConnection.java",
+    "java/src/com/xpeng/samples/master/TracingControllerAndroid.java",
+    "java/src/com/xpeng/samples/shell/ShellHost.java",
+    "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
+    "java/src/com/xpeng/samples_public/common/SamplesProcessInfo.java",
+    "java/src/com/xpeng/samples_public/common/SamplesSwitches.java",
+    "java/src/com/xpeng/samples_public/master/ChildProcessLauncherHelper.java",
+    "java/src/com/xpeng/samples_public/master/MasterStartupController.java",
+    "java/src/com/xpeng/samples/app/SamplesMain.java",
+  ]
+}
+
+generate_jni("samples_jni_headers") {
+  sources = [
+    "java/src/com/xpeng/samples/app/SamplesChildProcessServiceDelegate.java",
+    "java/src/com/xpeng/samples/common/ServiceManagerConnectionImpl.java",
+    "java/src/com/xpeng/samples/master/LauncherThread.java",
+    "java/src/com/xpeng/samples/master/SamplesFeatureList.java",
+    "java/src/com/xpeng/samples/master/ChildProcessLauncherHelperImpl.java",
+    "java/src/com/xpeng/samples/master/MasterStartupControllerImpl.java",
+    "java/src/com/xpeng/samples/master/TracingControllerAndroid.java",
+    "java/src/com/xpeng/samples/shell/ShellHostImpl.java",
+    "java/src/com/xpeng/samples/app/SamplesMain.java",
+  ]
+
+  jni_package = "samples"
+}
+
+java_cpp_enum("samples_public_android_java_enums_srcjar") {
+  sources = [   
+    "//samples_affiliate/public/master/android/child_process_importance.h",
+  ]
+}

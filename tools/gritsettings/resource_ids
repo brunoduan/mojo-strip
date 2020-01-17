@@ -201,8 +201,8 @@
   },
   # END components/ section.
 
-  # START content/ section.
-  # content/ and ios/web/ must start at the same id.
+  # START samples/ section.
+  # samples/ and ios/web/ must start at the same id.
   # App only use one file depending on whether it is iOS or other platform.
   "samples/app/resources/samples_resources.grd": {
     "structures": [20000],
@@ -424,6 +424,18 @@
     "includes": [28900],
   },
 
+  "samples_affiliate/app/resources/samples_resources.grd": {
+    "structures": [29000],
+  },
+  "samples_affiliate/app/strings/samples_strings.grd": {
+    "messages": [29100],
+  },
+  "samples_affiliate/samples_resources.grd": {
+    "includes": [29400],
+  },
+  "samples_affiliate/shell/shell_resources.grd": {
+    "includes": [29500],
+  },
   # END "everything else" section.
   # Everything but chrome/, components/, content/, and ios/
 

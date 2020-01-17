@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<grit latest_public_release="0" current_release="1" output_all_resource_defines="false">
+  <outputs>
+    <output filename="grit/samples_resources.h" type="rc_header">
+      <emit emit_type='prepend'></emit>
+    </output>
+    <output filename="samples_resources.pak" type="data_package" />
+  </outputs>
+  <translations />
+  <release seq="1">
+    <includes>
+      <include name="IDR_MOJO_CATALOG_MANIFEST" file="../services/catalog/manifest.json" type="BINDATA" />
+      <include name="IDR_MOJO_SAMPLES_MASTER_MANIFEST" file="${root_gen_dir}/samples/public/app/master_manifest.json" use_base_dir="false" type="BINDATA" />
+      <include name="IDR_MOJO_SAMPLES_PACKAGED_SERVICES_MANIFEST" file="${root_gen_dir}/samples/public/app/packaged_services_manifest.json" use_base_dir="false" type="BINDATA" />
+      <include name="IDR_MOJO_SAMPLES_SLAVERER_MANIFEST" file="${root_gen_dir}/samples/public/app/slaverer_manifest.json" use_base_dir="false" type="BINDATA" />
+      <include name="IDR_MOJO_SAMPLES_UTILITY_MANIFEST" file="${root_gen_dir}/samples/public/app/utility_manifest.json" use_base_dir="false" type="BINDATA" />
+    </includes>
+  </release>
+</grit>

@@ -1,0 +1,75 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/features.gni")
+
+if (is_component_build) {
+  link_target_type = "source_set"
+} else {
+  link_target_type = "static_library"
+}
+target(link_target_type, "child") {
+  # Targets external to samples should always link to the public API.
+  # Internal targets can link to this but only if they're child processes
+  # (i.e. not samples/browser or samples/common) and only if they're inside the
+  # samples component (i.e. not samples/test or samples/shell).
+  visibility = [
+    ":*",
+    "//samples_affiliate/public/child:child_sources",
+    "//samples_affiliate/slaverer/*",
+    "//samples_affiliate/utility/*",
+    "//tools/ipc_fuzzer/*",
+  ]
+  if (is_android) {
+    # See comment in samples/app/BUILD.gn above samples_app_deps.
+    visibility += [ "//samples_affiliate/app:*" ]
+  }
+
+  sources = [
+    "child_process.cc",
+    "child_process.h",
+    "child_thread_impl.cc",
+    "child_thread_impl.h",
+    "field_trial.cc",
+    "field_trial.h",
+    "scoped_child_process_reference.cc",
+    "scoped_child_process_reference.h",
+    "service_factory.cc",
+    "service_factory.h",
+    "thread_safe_sender.cc",
+    "thread_safe_sender.h",
+  ]
+
+  configs += [ "//build/config:precompiled_headers" ]
+
+  public_deps = [
+    "//ipc",
+    "//services/service_manager/public/mojom:mojom_blink",
+  ]
+
+  deps = [
+    "//base",
+    "//components/tracing",                                                                                                                                                                                 
+    "//components/tracing:startup_tracing",
+    "//components/variations",
+    "//samples_affiliate/common",
+    "//samples_affiliate/public/common:common_sources",
+    "//mojo/core/embedder",
+    "//services/service_manager/public/cpp",
+    "//services/service_manager/public/mojom",
+    "//services/service_manager/runner/common",
+    "//services/tracing/public/cpp",
+    "//third_party/blink/public/common",
+    "//url",
+  ]
+
+  if (is_android) {
+    deps += [ "//third_party/android_tools:cpu_features" ]
+  }
+
+  configs += [
+    "//samples_affiliate:samples_implementation",
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]
+}

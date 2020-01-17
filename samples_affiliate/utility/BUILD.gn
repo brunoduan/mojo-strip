@@ -1,0 +1,42 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/jumbo.gni")
+
+jumbo_source_set("utility") {
+  # Only the public target should depend on this. All other targets (even
+  # internal samples ones other than test) should depend on the public one.
+  visibility = [
+    "//samples_affiliate/app:*",
+    "//samples_affiliate/public/utility:utility_sources",
+  ]
+
+  sources = [
+    "in_process_utility_thread.cc",
+    "in_process_utility_thread.h",
+    "utility_main.cc",
+    "utility_service_factory.cc",
+    "utility_service_factory.h",
+    "utility_thread_impl.cc",
+    "utility_thread_impl.h",
+  ]
+
+  configs += [ "//samples_affiliate:samples_implementation" ]
+
+  deps = [
+    "//base",
+    "//samples_affiliate:export",
+    "//samples_affiliate/child",
+    "//samples_affiliate/public/child:child_sources",
+    "//samples_affiliate/public/common:common_sources",
+    "//mojo/public/cpp/bindings",
+    "//sandbox",
+    "//services/data_decoder:lib",
+    "//services/data_decoder/public/cpp",
+    "//services/service_manager",
+    "//services/service_manager/public/cpp",
+    "//services/service_manager/public/mojom",
+    "//url",
+  ]
+}

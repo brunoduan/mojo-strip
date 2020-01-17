@@ -1,0 +1,41 @@
+{
+  "name": "samples_master",
+  "display_name": "Samples (master process)",
+  "options": {
+    "can_connect_to_other_services_as_any_user": true,
+    "can_connect_to_other_services_with_any_instance_name": true,
+    "can_create_other_service_instances": true
+  },
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        // Interfaces needed by a generic client of samples master.
+        "app": [
+        ],
+        "field_trials": [
+          "samples.mojom.FieldTrialRecorder"
+        ],
+        "slaverer": [
+          "samples.mojom.SlavererHost"
+        ],
+        "service_manager:service_factory": [
+          "service_manager.mojom.ServiceFactory"
+        ]
+      },
+      "requires": {
+        "*": [ "app" ],
+        "samples_slaverer": [ "master" ],
+        "samples_utility": [ "master" ],
+        "data_decoder": [ "json_parser" ],
+        "file": [ "file:filesystem", "file:leveldb" ],
+        "service_manager": [
+          "service_manager:service_manager"
+        ],
+        "tracing": [
+          "tracing"
+        ],
+        "unzip_service": [ "unzip_file" ]
+      }
+    }
+  }
+}

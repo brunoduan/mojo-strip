@@ -1,0 +1,90 @@
+import("//build/config/jumbo.gni")
+
+group("master") {
+  if (is_component_build) {
+    public_deps = [
+      "//samples_affiliate",
+    ]
+  } else {
+    public_deps = [
+      ":master_sources",
+    ]
+  }
+}
+
+jumbo_source_set("master_sources") {
+  visibility = [ "//samples_affiliate/*" ]
+  sources = [
+    "android/child_process_importance.h",
+    "android/java_interfaces.h",
+    "background_tracing_config.cc",
+    "background_tracing_config.h",
+    "background_tracing_manager.h",
+    "child_process_data.cc",
+    "child_process_data.h",
+    "child_process_launcher_utils.h",
+    "child_process_security_policy.h",
+    "child_process_termination_info.h",
+    "global_request_id.h",
+    "site_isolation_policy.cc",
+    "site_isolation_policy.h",
+    "master_context.h",
+    "master_main_runner.h",
+    "master_child_process_host.h",
+    "master_child_process_host_delegate.h",
+    "master_child_process_host_iterator.cc",
+    "master_child_process_host_iterator.h",
+    "master_child_process_observer.cc",
+    "master_child_process_observer.h",
+    "master_main_parts.h",
+    "master_message_filter.cc",
+    "master_message_filter.h",
+    "master_task_traits.cc",
+    "master_task_traits.h",
+    "master_thread.h",
+    "master_thread_delegate.h",
+    "notification_details.h",
+    "notification_event_dispatcher.h",
+    "notification_observer.h",
+    "notification_registrar.cc",
+    "notification_registrar.h",
+    "notification_service.h",
+    "notification_source.h",
+    "notification_types.h",
+    "samples_master_client.cc",
+    "samples_master_client.h",
+    "slaver_process_host.h",
+    "slaver_process_host_factory.h",
+    "slaver_process_host_observer.h",
+    "startup_data.h",
+    "tracing_controller.h",                                                                                                                                                                                 
+    "tracing_delegate.cc",
+    "tracing_delegate.h",
+  ]
+
+  configs += [
+    "//build/config:precompiled_headers",
+    "//samples_affiliate:samples_implementation",
+  ]
+
+  public_deps = [
+    "//ipc",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//services/service_manager/public/cpp",
+    "//services/tracing/public/cpp",
+    "//third_party/blink/public:mojo_bindings",
+  ]
+
+  deps = [
+    "//samples_affiliate/master",
+  ]
+
+  allow_circular_includes_from = [
+    "//samples_affiliate/master",
+  ]
+
+  if (is_posix) {
+    sources += [ "posix_file_descriptor_info.h" ]
+  }
+}

@@ -73,4 +73,9 @@ public interface ChildProcessServiceDelegate {
      * be running.
      */
     void runMain();
+
+    /**
+     * Run the affiliate thread in the master process.
+     */
+    void runAffiliateThread();
 }

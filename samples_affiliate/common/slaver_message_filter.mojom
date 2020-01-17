@@ -1,0 +1,17 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module samples.mojom;
+
+import "mojo/public/mojom/base/thread_priority.mojom";
+
+interface SlaverMessageFilter {
+  // Synchronously generates a new routing ID for the caller.
+  [Sync] GenerateRoutingID() => (int32 routing_id);
+
+  // Asks the master to change the priority of thread.
+  [EnableIf=supports_thread_priorities]
+  SetThreadPriority(int32 platform_thread_id,
+                    mojo_base.mojom.ThreadPriority thread_priority);
+};
