@@ -32,7 +32,7 @@ autoninja -C out/Debug samples_shell_apk
 - [x] 单进程中跑通echo service
 - [x] 多进程中跑通echo service
 - [x] 多进程使用trace service
-- [ ] 进程启动以及绑定service流程改造，允许指定进程名，并使用mojo进行通信
+- [x] 进程启动以及绑定service流程改造，允许指定进程名，并使用mojo进行通信
 - [ ] Sandbox支持
 - [ ] 权限管理
 - [ ] 尝试将网络组件独立成service
